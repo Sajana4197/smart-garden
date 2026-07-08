@@ -4,7 +4,7 @@
 
 ---
 
-## Phase 0 — Project Bootstrap
+## Phase 0 — Project Bootstrap ✅ COMPLETED (2026-07-08)
 **Goal:** A clean, empty-but-structured Flutter project that builds and runs.
 - Run `flutter create`, set package/app name, org identifier.
 - Add all core dependencies from `PROJECT_SPEC.md` §2 (resolve to latest stable versions).
@@ -14,6 +14,8 @@
 - Set up `main.dart` / `app.dart` with a minimal `MaterialApp` (Material 3 enabled, placeholder home screen showing "SmartGarden AI").
 - Initialize git (if not already) with a sensible `.gitignore` for Flutter.
 - **Exit criteria:** `flutter analyze` is clean, `flutter run` shows a placeholder home screen on at least one platform (Android or iOS emulator, or web/desktop if that's the dev target).
+
+**Outcome:** Flutter SDK 3.44.5 installed. Project scaffolded as `smart_garden_ai` / `com.smartgarden.ai`, targeting **Android + iOS only** (Web/Windows scaffolding removed post-scaffold — mobile-only app per user decision). DI locked to manual `MultiProvider`, routing locked to `go_router`. Full `lib/` skeleton in place. `flutter analyze` clean; `flutter run` verified and screenshot-confirmed on the Android emulator. Git init deferred to the user. Two machine-specific environment issues were fixed along the way (Avast SSL-interception root CA trust for the Android Studio JBR; Kotlin incremental compilation disabled due to a cross-drive-letter bug) — see `TASKS.md` Current Status for detail.
 
 ## Phase 1 — Design System Foundation
 **Goal:** Material 3 theme (light + dark) and the shared widget library exist and are demonstrable.

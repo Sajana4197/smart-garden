@@ -12,24 +12,24 @@
 
 ## Current Status
 
-- **Active phase:** Phase 0 — Project Bootstrap
+- **Active phase:** Phase 1 — Design System Foundation
 - **Status:** Not started
-- **Last session summary:** N/A — documentation-only session completed on 2026-07-07 (this file and its siblings were created; no app code exists yet).
-- **Next action:** Begin Phase 0 — run `flutter create`, install dependencies, scaffold `lib/` folder structure.
+- **Last session summary:** Phase 0 completed on 2026-07-08. Flutter SDK 3.44.5 installed at `C:\src\flutter`. Project scaffolded as `smart_garden_ai` (org `com.smartgarden.ai`), Android + iOS only (Web/Windows scaffolding removed per user decision — mobile-only app). Full `lib/` skeleton created. `flutter analyze` clean. `flutter run` verified live on the Android emulator (Pixel_7) with a screenshot confirming the placeholder home screen renders correctly. Fixed two environment issues along the way: Avast antivirus SSL-interception root CA imported into the Android Studio JBR's cacerts (was blocking Gradle downloads), and Kotlin incremental compilation disabled in `android/gradle.properties` (was crashing on the project being on a different drive letter (E:) than the pub cache (C:)).
+- **Next action:** Begin Phase 1 — Design System Foundation per `ROADMAP.md` (Material 3 light/dark theme, shared widget library, component gallery).
 
 ---
 
 ## Phase 0 — Project Bootstrap
-- [ ] `flutter create` run with final package/app name and org identifier (confirm names with user if not already decided; record in `CLAUDE.md`)
-- [ ] Core dependencies added to `pubspec.yaml`: `provider`, `sqflite`, `path_provider`, `path`, `camera`, `image_picker`, `http` (or `dio`), `flutter_tts`, `shared_preferences`, `flutter_lints`
-- [ ] DI approach decided and recorded in `CLAUDE.md` (manual `provider` MultiProvider vs `get_it`)
-- [ ] Routing approach decided and recorded in `CLAUDE.md` (named routes vs `go_router`)
-- [ ] Full `lib/` folder skeleton created per `PROJECT_SPEC.md` §3
-- [ ] `analysis_options.yaml` configured with `flutter_lints`
-- [ ] Minimal `main.dart`/`app.dart` with Material 3 `MaterialApp` and placeholder home screen
-- [ ] `.gitignore` present and correct for Flutter
-- [ ] `flutter analyze` passes clean
-- [ ] `flutter run` verified on at least one target
+- [x] `flutter create` run with final package/app name and org identifier (confirm names with user if not already decided; record in `CLAUDE.md`)
+- [x] Core dependencies added to `pubspec.yaml`: `provider`, `sqflite`, `path_provider`, `path`, `camera`, `image_picker`, `http` (or `dio`), `flutter_tts`, `shared_preferences`, `flutter_lints` (plus `go_router` per locked routing decision)
+- [x] DI approach decided and recorded in `CLAUDE.md` (manual `provider` MultiProvider vs `get_it`)
+- [x] Routing approach decided and recorded in `CLAUDE.md` (named routes vs `go_router`)
+- [x] Full `lib/` folder skeleton created per `PROJECT_SPEC.md` §3
+- [x] `analysis_options.yaml` configured with `flutter_lints`
+- [x] Minimal `main.dart`/`app.dart` with Material 3 `MaterialApp` and placeholder home screen
+- [x] `.gitignore` present and correct for Flutter
+- [x] `flutter analyze` passes clean
+- [x] `flutter run` verified on at least one target (Android emulator, screenshot-confirmed)
 
 ## Phase 1 — Design System Foundation
 - [ ] Light `ColorScheme` implemented per `UI_GUIDELINES.md`
