@@ -12,10 +12,10 @@
 
 ## Current Status
 
-- **Active phase:** Phase 1 — Design System Foundation
+- **Active phase:** Phase 2 — Splash & Onboarding
 - **Status:** Not started
-- **Last session summary:** Phase 0 completed on 2026-07-08. Flutter SDK 3.44.5 installed at `C:\src\flutter`. Project scaffolded as `smart_garden_ai` (org `com.smartgarden.ai`), Android + iOS only (Web/Windows scaffolding removed per user decision — mobile-only app). Full `lib/` skeleton created. `flutter analyze` clean. `flutter run` verified live on the Android emulator (Pixel_7) with a screenshot confirming the placeholder home screen renders correctly. Fixed two environment issues along the way: Avast antivirus SSL-interception root CA imported into the Android Studio JBR's cacerts (was blocking Gradle downloads), and Kotlin incremental compilation disabled in `android/gradle.properties` (was crashing on the project being on a different drive letter (E:) than the pub cache (C:)).
-- **Next action:** Begin Phase 1 — Design System Foundation per `ROADMAP.md` (Material 3 light/dark theme, shared widget library, component gallery).
+- **Last session summary:** Phase 1 completed on 2026-07-08. Built `core/theme/` (`AppTheme.light`/`.dark` via `ColorScheme.fromSeed(0xFF2E7D32)`, Manrope type scale, `AppColors` `ThemeExtension` for healthy/mild/moderate/severe status colors) and `ThemeModeController` (provider `ChangeNotifier`) wired into `MaterialApp.themeMode` in `app.dart`. Built the shared widget library in `core/widgets/`: `AppPrimaryButton`, `AppSecondaryButton`, `SmartGardenAppBar`, `AppCard`, `SectionHeader`, `AppLoadingIndicator`, `EmptyStateWidget`, `ErrorStateWidget`, and `AppStatusBadge` (per `UI_GUIDELINES.md` §6, built once for reuse in later phases). Added a temporary `ComponentGalleryScreen` at debug route `/debug/gallery` (reachable via a debug icon button on the Home placeholder's app bar) that renders every shared widget and a live light/dark/system theme switch. `flutter analyze` clean; `flutter run` verified live on the Android emulator (Pixel_7) in both themes — two bugs were caught only by this live check and fixed before sign-off: (1) `google_fonts`' runtime font-fetch failed on-device with a TLS certificate error and also violated the offline-first NFR, so Manrope was switched to a locally bundled asset font (`assets/fonts/Manrope-Variable.ttf`, `google_fonts` dependency removed); (2) a `RenderFlex` overflow in the gallery's own theme-mode `SegmentedButton` row, fixed by switching it from a `Row` to a `Column`. Also hit unrelated emulator instability this session (`system_server` crashing under host memory pressure) — resolved by killing and relaunching the emulator, not a code issue.
+- **Next action:** Begin Phase 2 — Splash & Onboarding per `ROADMAP.md` (branded splash screen, first-launch flag, onboarding carousel).
 
 ---
 
@@ -31,22 +31,23 @@
 - [x] `flutter analyze` passes clean
 - [x] `flutter run` verified on at least one target (Android emulator, screenshot-confirmed)
 
-## Phase 1 — Design System Foundation
-- [ ] Light `ColorScheme` implemented per `UI_GUIDELINES.md`
-- [ ] Dark `ColorScheme` implemented per `UI_GUIDELINES.md`
-- [ ] `TextTheme` implemented (both modes)
-- [ ] Full `ThemeData` assembled for light and dark
-- [ ] `ThemeModeController` (provider) implemented, wired into `MaterialApp.themeMode`
-- [ ] Shared widget: primary button
-- [ ] Shared widget: secondary/outlined button
-- [ ] Shared widget: branded `AppBar`
-- [ ] Shared widget: card container
-- [ ] Shared widget: section header
-- [ ] Shared widget: loading indicator
-- [ ] Shared widget: empty-state widget
-- [ ] Shared widget: error-state widget
-- [ ] Temporary component gallery debug route added
-- [ ] Verified: theme toggle switches entire app correctly in both directions
+## Phase 1 — Design System Foundation ✅ COMPLETED (2026-07-08)
+- [x] Light `ColorScheme` implemented per `UI_GUIDELINES.md`
+- [x] Dark `ColorScheme` implemented per `UI_GUIDELINES.md`
+- [x] `TextTheme` implemented (both modes)
+- [x] Full `ThemeData` assembled for light and dark
+- [x] `ThemeModeController` (provider) implemented, wired into `MaterialApp.themeMode`
+- [x] Shared widget: primary button
+- [x] Shared widget: secondary/outlined button
+- [x] Shared widget: branded `AppBar`
+- [x] Shared widget: card container
+- [x] Shared widget: section header
+- [x] Shared widget: loading indicator
+- [x] Shared widget: empty-state widget
+- [x] Shared widget: error-state widget
+- [x] Shared widget: `AppStatusBadge` (per `UI_GUIDELINES.md` §6 — added beyond the original checklist since the guideline explicitly scopes it to Phase 1)
+- [x] Temporary component gallery debug route added
+- [x] Verified: theme toggle switches entire app correctly in both directions (on Android emulator)
 
 ## Phase 2 — Splash & Onboarding
 - [ ] Splash screen UI (branded entrance animation)

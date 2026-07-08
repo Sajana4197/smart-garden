@@ -17,13 +17,17 @@
 
 **Outcome:** Flutter SDK 3.44.5 installed. Project scaffolded as `smart_garden_ai` / `com.smartgarden.ai`, targeting **Android + iOS only** (Web/Windows scaffolding removed post-scaffold — mobile-only app per user decision). DI locked to manual `MultiProvider`, routing locked to `go_router`. Full `lib/` skeleton in place. `flutter analyze` clean; `flutter run` verified and screenshot-confirmed on the Android emulator. Git init deferred to the user. Two machine-specific environment issues were fixed along the way (Avast SSL-interception root CA trust for the Android Studio JBR; Kotlin incremental compilation disabled due to a cross-drive-letter bug) — see `TASKS.md` Current Status for detail.
 
-## Phase 1 — Design System Foundation
+## Phase 1 — Design System Foundation ✅ COMPLETED (2026-07-08)
 **Goal:** Material 3 theme (light + dark) and the shared widget library exist and are demonstrable.
 - Implement `core/theme/` — `ColorScheme` (light & dark, seeded per `UI_GUIDELINES.md`), `TextTheme`, full `ThemeData` for both modes.
 - Implement theme mode switching plumbing (provider-based `ThemeModeController`), even before Settings screen exists.
 - Build shared widgets in `core/widgets/`: primary/secondary buttons, app-branded `AppBar`, cards, section headers, loading indicator, empty-state widget, error-state widget.
 - Add a temporary "component gallery" debug route to visually verify all shared widgets in both themes (removable later or kept behind a debug flag).
 - **Exit criteria:** Toggling theme mode (even via a temp debug button) switches the whole app between light/dark with correct Material 3 styling.
+
+**Outcome:** `core/theme/app_theme.dart` assembles light/dark `ThemeData` from `ColorScheme.fromSeed(seedColor: 0xFF2E7D32)`, with the Manrope type scale applied via a locally bundled variable font asset (`assets/fonts/Manrope-Variable.ttf`), plus an `AppColors` `ThemeExtension` carrying the four semantic plant-health status colors (healthy/mild/moderate/severe) with light/dark variants, kept distinct from `ColorScheme.error`. `ThemeModeController` (a `provider` `ChangeNotifier`) is wired into `MaterialApp.themeMode` in `app.dart`. Shared widget library built in `core/widgets/`: `AppPrimaryButton`, `AppSecondaryButton`, `SmartGardenAppBar`, `AppCard` (M3 `Card.filled`), `SectionHeader`, `AppLoadingIndicator`, `EmptyStateWidget`, `ErrorStateWidget`, and `AppStatusBadge` (added beyond the original checklist per `UI_GUIDELINES.md` §6's explicit Phase 1 scoping). A temporary `ComponentGalleryScreen` at `/debug/gallery` (reachable from a debug icon button on the Home placeholder) renders every shared widget with a live light/dark/system `SegmentedButton` theme switch. `flutter analyze` clean; verified live on the Android emulator (Pixel_7) — toggling the switch flips the whole app, including the gallery's own `Scaffold`/`AppBar`/`Card` surfaces, between light and dark correctly.
+
+Live device verification caught two real bugs that `flutter analyze` alone missed: the font was originally wired up via the `google_fonts` package's runtime HTTP fetch, which both violates the project's offline-first NFR and failed outright on-device with a TLS certificate error — fixed by downloading the Manrope variable font once and bundling it as a local asset instead (dependency removed). A `RenderFlex` overflow also appeared in the gallery's own theme-mode row on-device (not caught by static analysis) and was fixed by switching that row to a `Column`. Route transition pattern remains an open Locked Decision — deferred until Phase 2/3 introduce more than one real route to transition between.
 
 ## Phase 2 — Splash & Onboarding
 **Goal:** App launch experience is complete.
