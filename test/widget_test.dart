@@ -1,14 +1,45 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:smart_garden_ai/app.dart';
+import 'package:smart_garden_ai/core/routing/app_router.dart';
 
 void main() {
-  testWidgets('SmartGardenApp shows placeholder home screen', (
+  late SharedPreferences prefs;
+
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
+    prefs = await SharedPreferences.getInstance();
+  });
+
+  // `appRouter` is a process-wide singleton, so each test must reset its
+  // location back to Splash to simulate a fresh app launch.
+  setUp(() {
+    appRouter.go(AppRoutes.splash);
+  });
+
+  testWidgets('Fresh install routes Splash -> Onboarding', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const SmartGardenApp());
-    await tester.pumpAndSettle();
+    await tester.pumpWidget(SmartGardenApp(prefs: prefs));
 
     expect(find.text('SmartGarden AI'), findsOneWidget);
+
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    expect(find.text('Skip'), findsOneWidget);
+    expect(find.text('Next'), findsOneWidget);
+  });
+
+  testWidgets('Returning user routes Splash -> Home', (
+    WidgetTester tester,
+  ) async {
+    await prefs.setBool('onboarding_complete', true);
+
+    await tester.pumpWidget(SmartGardenApp(prefs: prefs));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    expect(find.text('Skip'), findsNothing);
+    expect(find.byTooltip('Component gallery (debug)'), findsOneWidget);
   });
 }

@@ -12,10 +12,10 @@
 
 ## Current Status
 
-- **Active phase:** Phase 2 — Splash & Onboarding
+- **Active phase:** Phase 3 — Navigation Shell & Home Dashboard (static)
 - **Status:** Not started
-- **Last session summary:** Phase 1 completed on 2026-07-08. Built `core/theme/` (`AppTheme.light`/`.dark` via `ColorScheme.fromSeed(0xFF2E7D32)`, Manrope type scale, `AppColors` `ThemeExtension` for healthy/mild/moderate/severe status colors) and `ThemeModeController` (provider `ChangeNotifier`) wired into `MaterialApp.themeMode` in `app.dart`. Built the shared widget library in `core/widgets/`: `AppPrimaryButton`, `AppSecondaryButton`, `SmartGardenAppBar`, `AppCard`, `SectionHeader`, `AppLoadingIndicator`, `EmptyStateWidget`, `ErrorStateWidget`, and `AppStatusBadge` (per `UI_GUIDELINES.md` §6, built once for reuse in later phases). Added a temporary `ComponentGalleryScreen` at debug route `/debug/gallery` (reachable via a debug icon button on the Home placeholder's app bar) that renders every shared widget and a live light/dark/system theme switch. `flutter analyze` clean; `flutter run` verified live on the Android emulator (Pixel_7) in both themes — two bugs were caught only by this live check and fixed before sign-off: (1) `google_fonts`' runtime font-fetch failed on-device with a TLS certificate error and also violated the offline-first NFR, so Manrope was switched to a locally bundled asset font (`assets/fonts/Manrope-Variable.ttf`, `google_fonts` dependency removed); (2) a `RenderFlex` overflow in the gallery's own theme-mode `SegmentedButton` row, fixed by switching it from a `Row` to a `Column`. Also hit unrelated emulator instability this session (`system_server` crashing under host memory pressure) — resolved by killing and relaunching the emulator, not a code issue.
-- **Next action:** Begin Phase 2 — Splash & Onboarding per `ROADMAP.md` (branded splash screen, first-launch flag, onboarding carousel).
+- **Last session summary:** Phase 2 completed on 2026-07-09. Added `core/theme/app_motion.dart` (`AppDurations`/`AppCurves` per `UI_GUIDELINES.md` §5, needed for the splash entrance and carousel transitions). Built the `onboarding` feature with full Clean Architecture layering: `OnboardingRepository`/`OnboardingLocalDataSource` (`shared_preferences`-backed `onboarding_complete` flag) in `data`, `CheckOnboardingStatus`/`CompleteOnboarding` use cases in `domain`, and an `OnboardingProvider` + 4-slide `OnboardingScreen` (`PageView`, animated dot indicator, Skip/Next/Get Started controls) in `presentation`. Built `SplashScreen` (fade+scale branded entrance, waits for a minimum display time concurrently with the onboarding-status check, then routes). Wired both into `core/routing/app_router.dart` as `/splash` (new initial location) and `/onboarding`; `main.dart` is now async and loads `SharedPreferences` once, injected into `app.dart`'s `MultiProvider` alongside the existing `ThemeModeController`. `flutter analyze` clean. `flutter test` passes (2 widget tests covering fresh-install → Onboarding and returning-user → Home; along the way fixed two test-only gotchas that are not app bugs — the `shared_preferences` plugin memoizes its singleton across tests, and `appRouter` is a process-wide singleton whose location needed resetting between tests). Verified live on the Android emulator (Pixel_7) in both light and dark themes: fresh install → Onboarding (all 4 slides paged via swipe, Skip correctly completes and routes to Home), and — after `pm clear` to reset the flag and a cold relaunch — returning user → Home directly, confirming the flag persists via real on-device `SharedPreferences`, not just the mock in tests. The Splash screen's own ~1.1s animated frame was not directly screenshotted (its window is narrower than the adb screenshot round-trip, so every capture attempt landed just before or just after it), but its content and transition logic are covered by the widget tests and its correct hand-off to both destinations was observed live in both themes. Emulator needed a kill+relaunch this session (same offline/stuck-boot issue as Phase 1, under host memory pressure) before it would come online — not a code issue.
+- **Next action:** Begin Phase 3 — Navigation Shell & Home Dashboard (static) per `ROADMAP.md` (primary nav shell — bottom nav vs rail, confirm and record in `CLAUDE.md` — plus the real Home Dashboard UI with placeholder data).
 
 ---
 
@@ -49,14 +49,14 @@
 - [x] Temporary component gallery debug route added
 - [x] Verified: theme toggle switches entire app correctly in both directions (on Android emulator)
 
-## Phase 2 — Splash & Onboarding
-- [ ] Splash screen UI (branded entrance animation)
-- [ ] First-launch flag read/write via `shared_preferences`
-- [ ] Splash routing logic (first run → Onboarding; else → Home)
-- [ ] Onboarding carousel UI (3–4 slides)
-- [ ] Onboarding skip/next/CTA controls
-- [ ] Onboarding completion sets first-launch flag
-- [ ] Verified: fresh install flow and returning-user flow both behave correctly
+## Phase 2 — Splash & Onboarding ✅ COMPLETED (2026-07-09)
+- [x] Splash screen UI (branded entrance animation)
+- [x] First-launch flag read/write via `shared_preferences`
+- [x] Splash routing logic (first run → Onboarding; else → Home)
+- [x] Onboarding carousel UI (3–4 slides) — 4 slides implemented
+- [x] Onboarding skip/next/CTA controls
+- [x] Onboarding completion sets first-launch flag
+- [x] Verified: fresh install flow and returning-user flow both behave correctly (live on Android emulator, both themes)
 
 ## Phase 3 — Navigation Shell & Home Dashboard (static)
 - [ ] Primary navigation shell built (bottom nav or nav rail) — structure confirmed and recorded in `CLAUDE.md`
