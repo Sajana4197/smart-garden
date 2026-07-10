@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../../../core/widgets/section_header.dart';
+import '../widgets/scan_source_sheet.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
   const HomeDashboardScreen({super.key});
@@ -55,11 +56,7 @@ class HomeDashboardScreen extends StatelessWidget {
           AppPrimaryButton(
             label: 'Scan a Plant',
             icon: Icons.camera_alt_outlined,
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Scanning is coming soon.')),
-              );
-            },
+            onPressed: () => showScanSourceSheet(context),
           ),
           const SizedBox(height: AppSpacing.lg),
           SectionHeader(

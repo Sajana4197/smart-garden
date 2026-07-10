@@ -12,10 +12,10 @@
 
 ## Current Status
 
-- **Active phase:** Phase 5 — Camera & Gallery Capture
+- **Active phase:** Phase 6 — Preview & AI Loading Animation
 - **Status:** Not started
-- **Last session summary:** Phase 4 completed on 2026-07-10. Added `services/database/app_database.dart` (`AppDatabase` singleton, lazily opens `smart_garden.db`, shared static `onCreateSchema` creates `plants`/`scans`/`daily_tip_state`) and `core/constants/db_constants.dart` (`schemaVersion` + every table/column name). Built full data+domain layers for `my_garden` (`Plant` entity, `PlantHealthStatus` enum, `PlantRepository` interface, `PlantModel`, `PlantLocalDataSource`, `PlantRepositoryImpl`) and `scan_history` (`Scan` entity, `ScanSeverity` enum, `ScanRepository` interface incl. `updateScan` for the Phase-9 plant-link case, `ScanModel`, `ScanLocalDataSource`, `ScanRepositoryImpl`). Standardized `PlantHealthStatus` on the same healthy/mild/moderate/severe vocabulary as `AppStatusBadge`/`scans.severity` (resolves a `PROJECT_SPEC.md` §5 inconsistency, recorded in `CLAUDE.md` §3). Added `sqflite_common_ffi` dev dependency so `PlantRepositoryImpl`/`ScanRepositoryImpl` are unit-tested against a real in-memory SQLite schema via `AppDatabase.forTesting`. Removed stale `.gitkeep`s in folders that gained real files. `flutter analyze` clean; `flutter test` passes 16/16 (6 new Plant CRUD tests + 8 new Scan CRUD tests + 2 pre-existing widget tests). No UI touched this phase, matching the exit criteria — no live-emulator step was needed.
-- **Next action:** Begin Phase 5 — Camera & Gallery Capture per `ROADMAP.md` (`camera` live preview/capture + permission handling, `image_picker` gallery pick + permission handling, both copying into app sandbox storage and returning a stable path, wired from Home's "Scan a Plant" CTA via a Camera/Gallery choice bottom sheet).
+- **Last session summary:** Phase 5 completed on 2026-07-10. Added `services/storage/image_storage_service.dart` (`ImageStorageService`, copies raw camera/gallery temp files into `<app documents>/scans/`, returns a stable path). Built minimal domain+data layers for `camera` (`CameraCaptureRepository`/`Impl`, `StoreCapturedPhoto`) and `gallery` (`GalleryRepository`/`Impl`, `StorePickedPhoto`), both prefixing filenames (`camera_`/`gallery_`) via the shared storage service. Built `CameraScreen` (live `CameraController` preview, capture button, app-lifecycle-aware dispose/reinit, permission-denial error state, immersive black chrome). Gallery picking uses `image_picker`'s native OS picker directly — no dedicated screen — invoked from the new `scan_source_sheet.dart` M3 bottom sheet wired to Home's "Scan a Plant" CTA. Both flows push a new temporary `PreviewScreen` (image + sandboxed path + Retake; intentionally minimal, `TODO(Phase 6)`'d for the real version). Declared `CAMERA` permission (Android manifest) and `NSCameraUsageDescription`/`NSPhotoLibraryUsageDescription` (iOS Info.plist). Wired new use cases into `app.dart`'s `MultiProvider` and added `/camera`+`/preview` routes. `flutter analyze` clean; `flutter test` still 16/16 (no new tests — plugin-driven UI, not unit-testable domain logic). Verified live end-to-end on the Android emulator in both themes: full Camera flow (permission prompt → grant → live preview → capture → correct sandbox path shown on Preview → Retake resumes a warm camera) and full Gallery flow (native Photo Picker → selection → correct sandbox path shown on Preview → Retake returns to Home).
+- **Next action:** Begin Phase 6 — Preview & AI Loading Animation per `ROADMAP.md` (replace the Phase-5 placeholder `PreviewScreen` with the real Preview screen — Retake/Confirm actions, `Hero` continuity from Camera/Gallery — and build the branded AI Loading screen that Confirm transitions into, calling into `AIService` with a stub result if Phase 7 hasn't landed yet).
 
 ---
 
@@ -80,14 +80,14 @@
 - [x] Unit tests: `ScanRepository` CRUD
 - [x] All repository tests passing
 
-## Phase 5 — Camera & Gallery Capture
-- [ ] Camera feature: live preview + capture
-- [ ] Camera permission request/rationale/denial UI
-- [ ] Gallery feature: `image_picker` integration
-- [ ] Gallery permission request/rationale/denial UI
-- [ ] Captured/picked images copied into app sandbox storage (stable path)
-- [ ] Home quick-scan CTA opens Camera/Gallery choice sheet
-- [ ] Verified: resulting image path is valid and displayable after capture and after gallery pick
+## Phase 5 — Camera & Gallery Capture ✅ COMPLETED (2026-07-10)
+- [x] Camera feature: live preview + capture
+- [x] Camera permission request/rationale/denial UI
+- [x] Gallery feature: `image_picker` integration
+- [x] Gallery permission request/rationale/denial UI
+- [x] Captured/picked images copied into app sandbox storage (stable path)
+- [x] Home quick-scan CTA opens Camera/Gallery choice sheet
+- [x] Verified: resulting image path is valid and displayable after capture and after gallery pick
 
 ## Phase 6 — Preview & AI Loading Animation
 - [ ] Preview screen: full-size image display

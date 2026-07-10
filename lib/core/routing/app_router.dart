@@ -2,10 +2,12 @@ import 'package:go_router/go_router.dart';
 
 import '../debug/component_gallery_screen.dart';
 import 'main_shell_screen.dart';
+import '../../features/camera/presentation/screens/camera_screen.dart';
 import '../../features/home_dashboard/presentation/screens/home_dashboard_screen.dart';
 import '../../features/my_garden/presentation/screens/my_garden_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/plant_health_dashboard/presentation/screens/plant_health_dashboard_screen.dart';
+import '../../features/preview/presentation/screens/preview_screen.dart';
 import '../../features/scan_history/presentation/screens/scan_history_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
@@ -18,6 +20,8 @@ abstract final class AppRoutes {
   static const String scanHistory = '/scan-history';
   static const String plantHealth = '/plant-health';
   static const String settings = '/settings';
+  static const String camera = '/camera';
+  static const String preview = '/preview';
   static const String debugGallery = '/debug/gallery';
 }
 
@@ -35,6 +39,15 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.debugGallery,
       builder: (context, state) => const ComponentGalleryScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.camera,
+      builder: (context, state) => const CameraScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.preview,
+      builder: (context, state) =>
+          PreviewScreen(imagePath: state.extra! as String),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>

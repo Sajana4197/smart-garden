@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>SmartGarden AI needs camera access so you can photograph your plants for instant health diagnosis.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SmartGarden AI needs photo library access so you can choose an existing photo of your plant for diagnosis.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -5,11 +5,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_mode_controller.dart';
+import 'features/camera/data/repositories/camera_capture_repository_impl.dart';
+import 'features/camera/domain/repositories/camera_capture_repository.dart';
+import 'features/camera/domain/usecases/store_captured_photo.dart';
+import 'features/gallery/data/repositories/gallery_repository_impl.dart';
+import 'features/gallery/domain/repositories/gallery_repository.dart';
+import 'features/gallery/domain/usecases/store_picked_photo.dart';
 import 'features/onboarding/data/datasources/onboarding_local_datasource.dart';
 import 'features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import 'features/onboarding/domain/repositories/onboarding_repository.dart';
 import 'features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'features/onboarding/domain/usecases/complete_onboarding.dart';
+import 'services/storage/image_storage_service.dart';
 
 class SmartGardenApp extends StatelessWidget {
   const SmartGardenApp({super.key, required this.prefs});
@@ -21,6 +28,11 @@ class SmartGardenApp extends StatelessWidget {
     final OnboardingRepository onboardingRepository = OnboardingRepositoryImpl(
       OnboardingLocalDataSource(prefs),
     );
+    final imageStorageService = ImageStorageService();
+    final CameraCaptureRepository cameraCaptureRepository =
+        CameraCaptureRepositoryImpl(imageStorageService);
+    final GalleryRepository galleryRepository =
+        GalleryRepositoryImpl(imageStorageService);
 
     return MultiProvider(
       providers: [
@@ -30,6 +42,12 @@ class SmartGardenApp extends StatelessWidget {
         ),
         Provider<CompleteOnboarding>(
           create: (_) => CompleteOnboarding(onboardingRepository),
+        ),
+        Provider<StoreCapturedPhoto>(
+          create: (_) => StoreCapturedPhoto(cameraCaptureRepository),
+        ),
+        Provider<StorePickedPhoto>(
+          create: (_) => StorePickedPhoto(galleryRepository),
         ),
       ],
       child: Consumer<ThemeModeController>(
