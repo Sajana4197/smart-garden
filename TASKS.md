@@ -12,10 +12,10 @@
 
 ## Current Status
 
-- **Active phase:** Phase 4 — SQLite Persistence Layer
+- **Active phase:** Phase 5 — Camera & Gallery Capture
 - **Status:** Not started
-- **Last session summary:** Phase 3 completed on 2026-07-10. Built the primary navigation shell: bottom M3 `NavigationBar` with 5 destinations (Home, My Garden, Scan History, Plant Health, Settings) via `go_router`'s `StatefulShellRoute.indexedStack` — `core/routing/main_shell_screen.dart` (shell `Scaffold`+`NavigationBar`) and `core/routing/app_router.dart` (5 branches, routes `/`, `/my-garden`, `/scan-history`, `/plant-health`, `/settings`), decision recorded in `CLAUDE.md` §3. Added minimal stub screens for `MyGardenScreen`, `ScanHistoryScreen`, `PlantHealthDashboardScreen`, `SettingsScreen` (own app bar + shared `EmptyStateWidget`, `TODO(Phase N)` pointing at the phase that builds each out for real). Rebuilt `HomeDashboardScreen` into the real static dashboard: time-of-day greeting, weather summary card (static placeholder), daily tip card (static placeholder), full-width "Scan a Plant" CTA (snackbar placeholder until Phase 5), and a "Recent Activity" preview (3 static entries with `AppStatusBadge`) whose "See all" navigates to the Scan History tab — all built from existing Phase-1 shared widgets/tokens, no new one-off styles. Kept the debug-gallery entry on Home's app bar (not moved) so the existing widget test didn't need changing. `flutter analyze` clean, `flutter test` passes (2 widget tests, unchanged). Verified live on the Android emulator (Pixel_7): screenshotted Home, then tapped through all 5 `NavigationBar` destinations (found via `uiautomator dump` bounds, not eyeballed coordinates) confirming correct content and selection state per tab; verified dark mode by flipping the emulator's system theme (`ThemeModeController` still defaults to `ThemeMode.system`, no in-app toggle until Phase 15) — full contrast/legibility held.
-- **Next action:** Begin Phase 4 — SQLite Persistence Layer per `ROADMAP.md` (`sqflite` DB helper/service + schema versioning, `plants`/`scans`/`daily_tip_state` tables, domain entities, repository interfaces + implementations for `my_garden`/`scan_history`, unit tests against an in-memory/test DB — no UI changes yet).
+- **Last session summary:** Phase 4 completed on 2026-07-10. Added `services/database/app_database.dart` (`AppDatabase` singleton, lazily opens `smart_garden.db`, shared static `onCreateSchema` creates `plants`/`scans`/`daily_tip_state`) and `core/constants/db_constants.dart` (`schemaVersion` + every table/column name). Built full data+domain layers for `my_garden` (`Plant` entity, `PlantHealthStatus` enum, `PlantRepository` interface, `PlantModel`, `PlantLocalDataSource`, `PlantRepositoryImpl`) and `scan_history` (`Scan` entity, `ScanSeverity` enum, `ScanRepository` interface incl. `updateScan` for the Phase-9 plant-link case, `ScanModel`, `ScanLocalDataSource`, `ScanRepositoryImpl`). Standardized `PlantHealthStatus` on the same healthy/mild/moderate/severe vocabulary as `AppStatusBadge`/`scans.severity` (resolves a `PROJECT_SPEC.md` §5 inconsistency, recorded in `CLAUDE.md` §3). Added `sqflite_common_ffi` dev dependency so `PlantRepositoryImpl`/`ScanRepositoryImpl` are unit-tested against a real in-memory SQLite schema via `AppDatabase.forTesting`. Removed stale `.gitkeep`s in folders that gained real files. `flutter analyze` clean; `flutter test` passes 16/16 (6 new Plant CRUD tests + 8 new Scan CRUD tests + 2 pre-existing widget tests). No UI touched this phase, matching the exit criteria — no live-emulator step was needed.
+- **Next action:** Begin Phase 5 — Camera & Gallery Capture per `ROADMAP.md` (`camera` live preview/capture + permission handling, `image_picker` gallery pick + permission handling, both copying into app sandbox storage and returning a stable path, wired from Home's "Scan a Plant" CTA via a Camera/Gallery choice bottom sheet).
 
 ---
 
@@ -68,17 +68,17 @@
 - [x] Home Dashboard: recent activity preview (static placeholder)
 - [x] Verified in both light and dark themes
 
-## Phase 4 — SQLite Persistence Layer
-- [ ] DB helper/service created, schema versioning constant defined
-- [ ] `plants` table created (`onCreate`)
-- [ ] `scans` table created (`onCreate`)
-- [ ] `daily_tip_state` table/mechanism created
-- [ ] Domain entities: `Plant`, `Scan` (pure Dart)
-- [ ] Repository interfaces: `PlantRepository`, `ScanRepository`
-- [ ] Repository implementations (sqflite-backed)
-- [ ] Unit tests: `PlantRepository` CRUD
-- [ ] Unit tests: `ScanRepository` CRUD
-- [ ] All repository tests passing
+## Phase 4 — SQLite Persistence Layer ✅ COMPLETED (2026-07-10)
+- [x] DB helper/service created, schema versioning constant defined
+- [x] `plants` table created (`onCreate`)
+- [x] `scans` table created (`onCreate`)
+- [x] `daily_tip_state` table/mechanism created
+- [x] Domain entities: `Plant`, `Scan` (pure Dart)
+- [x] Repository interfaces: `PlantRepository`, `ScanRepository`
+- [x] Repository implementations (sqflite-backed)
+- [x] Unit tests: `PlantRepository` CRUD
+- [x] Unit tests: `ScanRepository` CRUD
+- [x] All repository tests passing
 
 ## Phase 5 — Camera & Gallery Capture
 - [ ] Camera feature: live preview + capture
