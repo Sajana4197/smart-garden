@@ -12,10 +12,10 @@
 
 ## Current Status
 
-- **Active phase:** Phase 6 — Preview & AI Loading Animation
+- **Active phase:** Phase 7 — Mock AIService & Result Screen
 - **Status:** Not started
-- **Last session summary:** Phase 5 completed on 2026-07-10. Added `services/storage/image_storage_service.dart` (`ImageStorageService`, copies raw camera/gallery temp files into `<app documents>/scans/`, returns a stable path). Built minimal domain+data layers for `camera` (`CameraCaptureRepository`/`Impl`, `StoreCapturedPhoto`) and `gallery` (`GalleryRepository`/`Impl`, `StorePickedPhoto`), both prefixing filenames (`camera_`/`gallery_`) via the shared storage service. Built `CameraScreen` (live `CameraController` preview, capture button, app-lifecycle-aware dispose/reinit, permission-denial error state, immersive black chrome). Gallery picking uses `image_picker`'s native OS picker directly — no dedicated screen — invoked from the new `scan_source_sheet.dart` M3 bottom sheet wired to Home's "Scan a Plant" CTA. Both flows push a new temporary `PreviewScreen` (image + sandboxed path + Retake; intentionally minimal, `TODO(Phase 6)`'d for the real version). Declared `CAMERA` permission (Android manifest) and `NSCameraUsageDescription`/`NSPhotoLibraryUsageDescription` (iOS Info.plist). Wired new use cases into `app.dart`'s `MultiProvider` and added `/camera`+`/preview` routes. `flutter analyze` clean; `flutter test` still 16/16 (no new tests — plugin-driven UI, not unit-testable domain logic). Verified live end-to-end on the Android emulator in both themes: full Camera flow (permission prompt → grant → live preview → capture → correct sandbox path shown on Preview → Retake resumes a warm camera) and full Gallery flow (native Photo Picker → selection → correct sandbox path shown on Preview → Retake returns to Home).
-- **Next action:** Begin Phase 6 — Preview & AI Loading Animation per `ROADMAP.md` (replace the Phase-5 placeholder `PreviewScreen` with the real Preview screen — Retake/Confirm actions, `Hero` continuity from Camera/Gallery — and build the branded AI Loading screen that Confirm transitions into, calling into `AIService` with a stub result if Phase 7 hasn't landed yet).
+- **Last session summary:** Phase 6 completed on 2026-07-11. Rewrote `PreviewScreen` (real version: full-size `Hero`-tagged image, Retake/Confirm). Built `AiLoadingScreen`: `Hero`-continuous dimmed photo with a glowing sweep-line animation + pulsing "Analyzing your plant…" label, and a simulated 2.2s delay standing in for `AIService.analyzeImage()` (`TODO(Phase 7)`) before `pushReplacement`-ing to Result. Added a minimal placeholder `ResultScreen` (`TODO(Phase 7)`). Wired `/ai-loading` + `/result` top-level routes. Caught and fixed a real bug while verifying live: the sweep line was built as `LayoutBuilder > AnimatedBuilder > Positioned` sitting as a bare `Stack` child, which silently ignored the `Positioned` offset (screenshots showed it filling the whole screen) because `LayoutBuilder` owns its own `RenderObject`; fixed via `Positioned.fill > AnimatedBuilder > Align` instead (see `CLAUDE.md` §3 for the full explanation — worth remembering for any future Stack+Positioned+builder-widget combination). `flutter analyze` clean; `flutter test` still 16/16. Verified live end-to-end on the Android emulator in both themes: Confirm → AI Loading (sweep line confirmed rendering correctly as a thin glow band after the fix) → auto-navigate to placeholder Result with Hero continuity intact → Back to Home.
+- **Next action:** Begin Phase 7 — Mock AIService & Result Screen per `ROADMAP.md`/`MODEL_INTEGRATION.md` (`AIService` abstract contract + `PlantDiagnosisResult`/`DiagnosisSeverity` entities, `MockAIService` with curated result bank + simulated latency, DI wiring, real Result screen replacing the Phase-6 placeholder, `AiLoadingScreen` calling the real `analyzeImage()`, and persisting each scan via the Phase 4 `ScanRepository`).
 
 ---
 
@@ -89,13 +89,13 @@
 - [x] Home quick-scan CTA opens Camera/Gallery choice sheet
 - [x] Verified: resulting image path is valid and displayable after capture and after gallery pick
 
-## Phase 6 — Preview & AI Loading Animation
-- [ ] Preview screen: full-size image display
-- [ ] Preview: Retake action (returns to Camera/Gallery)
-- [ ] Preview: Confirm action (proceeds to AI Loading)
-- [ ] AI Loading screen: branded animated analyzing state
-- [ ] AI Loading: calls into `AIService` (stub result acceptable if Phase 7 not yet done)
-- [ ] Verified: Confirm → animation → navigation forward works end-to-end
+## Phase 6 — Preview & AI Loading Animation ✅ COMPLETED (2026-07-11)
+- [x] Preview screen: full-size image display
+- [x] Preview: Retake action (returns to Camera/Gallery)
+- [x] Preview: Confirm action (proceeds to AI Loading)
+- [x] AI Loading screen: branded animated analyzing state
+- [x] AI Loading: calls into `AIService` (stub result acceptable if Phase 7 not yet done)
+- [x] Verified: Confirm → animation → navigation forward works end-to-end
 
 ## Phase 7 — Mock AIService & Result Screen
 - [ ] `AIService` abstract contract defined per `MODEL_INTEGRATION.md`
