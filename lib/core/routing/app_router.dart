@@ -1,14 +1,23 @@
 import 'package:go_router/go_router.dart';
 
 import '../debug/component_gallery_screen.dart';
+import 'main_shell_screen.dart';
 import '../../features/home_dashboard/presentation/screens/home_dashboard_screen.dart';
+import '../../features/my_garden/presentation/screens/my_garden_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/plant_health_dashboard/presentation/screens/plant_health_dashboard_screen.dart';
+import '../../features/scan_history/presentation/screens/scan_history_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 
 abstract final class AppRoutes {
   static const String splash = '/splash';
   static const String onboarding = '/onboarding';
   static const String home = '/';
+  static const String myGarden = '/my-garden';
+  static const String scanHistory = '/scan-history';
+  static const String plantHealth = '/plant-health';
+  static const String settings = '/settings';
   static const String debugGallery = '/debug/gallery';
 }
 
@@ -24,12 +33,54 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const OnboardingScreen(),
     ),
     GoRoute(
-      path: AppRoutes.home,
-      builder: (context, state) => const HomeDashboardScreen(),
-    ),
-    GoRoute(
       path: AppRoutes.debugGallery,
       builder: (context, state) => const ComponentGalleryScreen(),
+    ),
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) =>
+          MainShellScreen(navigationShell: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.home,
+              builder: (context, state) => const HomeDashboardScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.myGarden,
+              builder: (context, state) => const MyGardenScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.scanHistory,
+              builder: (context, state) => const ScanHistoryScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.plantHealth,
+              builder: (context, state) => const PlantHealthDashboardScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.settings,
+              builder: (context, state) => const SettingsScreen(),
+            ),
+          ],
+        ),
+      ],
     ),
   ],
 );
