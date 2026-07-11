@@ -16,6 +16,9 @@ import 'features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import 'features/onboarding/domain/repositories/onboarding_repository.dart';
 import 'features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'features/onboarding/domain/usecases/complete_onboarding.dart';
+import 'features/recommendation/data/repositories/recommendation_repository_impl.dart';
+import 'features/recommendation/domain/repositories/recommendation_repository.dart';
+import 'features/recommendation/domain/usecases/get_care_recommendation.dart';
 import 'features/scan_history/data/datasources/scan_local_datasource.dart';
 import 'features/scan_history/data/repositories/scan_repository_impl.dart';
 import 'features/scan_history/domain/repositories/scan_repository.dart';
@@ -42,6 +45,8 @@ class SmartGardenApp extends StatelessWidget {
     final ScanRepository scanRepository = ScanRepositoryImpl(
       ScanLocalDataSource(),
     );
+    final RecommendationRepository recommendationRepository =
+        RecommendationRepositoryImpl();
 
     return MultiProvider(
       providers: [
@@ -60,6 +65,9 @@ class SmartGardenApp extends StatelessWidget {
         ),
         Provider<AIService>(create: (_) => aiService),
         Provider<ScanRepository>(create: (_) => scanRepository),
+        Provider<GetCareRecommendation>(
+          create: (_) => GetCareRecommendation(recommendationRepository),
+        ),
       ],
       child: Consumer<ThemeModeController>(
         builder: (context, themeController, _) {

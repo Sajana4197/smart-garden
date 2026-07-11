@@ -8,8 +8,10 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/widgets/app_bar.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_primary_button.dart';
+import '../../../../core/widgets/app_secondary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../../../services/ai/ai_service.dart';
+import '../../../recommendation/presentation/screens/recommendation_screen.dart';
 
 /// Bundles the scan image path with its diagnosis for the `/result` route's
 /// `extra` — constructed by `AiLoadingScreen` after a successful
@@ -143,6 +145,15 @@ class ResultScreen extends StatelessWidget {
           ],
           const SizedBox(height: AppSpacing.lg),
           AppPrimaryButton(
+            label: 'View Care Recommendations',
+            icon: Icons.spa_outlined,
+            onPressed: () => context.push(
+              AppRoutes.recommendation,
+              extra: RecommendationScreenArgs(imagePath: imagePath, result: result),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppSecondaryButton(
             label: 'Back to Home',
             onPressed: () => context.go(AppRoutes.home),
           ),

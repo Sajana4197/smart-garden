@@ -9,6 +9,7 @@ import '../../features/my_garden/presentation/screens/my_garden_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/plant_health_dashboard/presentation/screens/plant_health_dashboard_screen.dart';
 import '../../features/preview/presentation/screens/preview_screen.dart';
+import '../../features/recommendation/presentation/screens/recommendation_screen.dart';
 import '../../features/result/presentation/screens/result_screen.dart';
 import '../../features/scan_history/presentation/screens/scan_history_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
@@ -26,6 +27,7 @@ abstract final class AppRoutes {
   static const String preview = '/preview';
   static const String aiLoading = '/ai-loading';
   static const String result = '/result';
+  static const String recommendation = '/recommendation';
   static const String debugGallery = '/debug/gallery';
 }
 
@@ -63,6 +65,16 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final args = state.extra! as ResultScreenArgs;
         return ResultScreen(imagePath: args.imagePath, result: args.result);
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.recommendation,
+      builder: (context, state) {
+        final args = state.extra! as RecommendationScreenArgs;
+        return RecommendationScreen(
+          imagePath: args.imagePath,
+          result: args.result,
+        );
       },
     ),
     StatefulShellRoute.indexedStack(
