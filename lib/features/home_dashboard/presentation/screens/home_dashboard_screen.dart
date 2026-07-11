@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../../../core/widgets/section_header.dart';
+import '../../../weather/presentation/widgets/weather_card.dart';
 import '../widgets/scan_source_sheet.dart';
 
 class HomeDashboardScreen extends StatelessWidget {
@@ -49,7 +50,7 @@ class HomeDashboardScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          const _WeatherCard(),
+          const WeatherCard(),
           const SizedBox(height: AppSpacing.md),
           const _DailyTipCard(),
           const SizedBox(height: AppSpacing.lg),
@@ -66,44 +67,6 @@ class HomeDashboardScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           const _RecentActivityList(),
-        ],
-      ),
-    );
-  }
-}
-
-class _WeatherCard extends StatelessWidget {
-  const _WeatherCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return AppCard(
-      child: Row(
-        children: [
-          Icon(
-            Icons.wb_cloudy_outlined,
-            size: 40,
-            color: colorScheme.primary,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Colombo, LK', style: textTheme.titleMedium),
-                Text(
-                  'Partly cloudy',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text('28°C', style: textTheme.headlineSmall),
         ],
       ),
     );

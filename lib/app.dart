@@ -34,6 +34,15 @@ import 'features/scan_history/domain/repositories/scan_repository.dart';
 import 'features/scan_history/domain/usecases/get_all_scans.dart';
 import 'features/scan_history/domain/usecases/get_scans_for_plant.dart';
 import 'features/scan_history/presentation/providers/scan_history_provider.dart';
+import 'features/weather/data/datasources/weather_local_datasource.dart';
+import 'features/weather/data/datasources/weather_remote_datasource.dart';
+import 'features/weather/data/repositories/location_repository_impl.dart';
+import 'features/weather/data/repositories/weather_repository_impl.dart';
+import 'features/weather/domain/repositories/location_repository.dart';
+import 'features/weather/domain/repositories/weather_repository.dart';
+import 'features/weather/domain/usecases/get_cached_weather.dart';
+import 'features/weather/domain/usecases/get_current_weather.dart';
+import 'features/weather/presentation/providers/weather_provider.dart';
 import 'services/ai/ai_service.dart';
 import 'services/ai/mock_ai_service.dart';
 import 'services/storage/image_storage_service.dart';
@@ -61,6 +70,11 @@ class SmartGardenApp extends StatelessWidget {
         RecommendationRepositoryImpl();
     final PlantRepository plantRepository = PlantRepositoryImpl(
       PlantLocalDataSource(),
+    );
+    final LocationRepository locationRepository = LocationRepositoryImpl();
+    final WeatherRepository weatherRepository = WeatherRepositoryImpl(
+      WeatherRemoteDataSource(),
+      WeatherLocalDataSource(prefs),
     );
 
     return MultiProvider(
@@ -113,6 +127,18 @@ class SmartGardenApp extends StatelessWidget {
         ChangeNotifierProvider<ScanHistoryProvider>(
           create: (context) =>
               ScanHistoryProvider(context.read<GetAllScans>())..loadScans(),
+        ),
+        Provider<GetCurrentWeather>(
+          create: (_) => GetCurrentWeather(locationRepository, weatherRepository),
+        ),
+        Provider<GetCachedWeather>(
+          create: (_) => GetCachedWeather(weatherRepository),
+        ),
+        ChangeNotifierProvider<WeatherProvider>(
+          create: (context) => WeatherProvider(
+            context.read<GetCurrentWeather>(),
+            context.read<GetCachedWeather>(),
+          )..loadWeather(),
         ),
       ],
       child: Consumer<ThemeModeController>(

@@ -30,6 +30,8 @@
 	<string>SmartGarden AI needs camera access so you can photograph your plants for instant health diagnosis.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>SmartGarden AI needs photo library access so you can choose an existing photo of your plant for diagnosis.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>SmartGarden AI uses your location to show local weather so we can help you time watering and care around real conditions.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
