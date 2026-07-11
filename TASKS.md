@@ -12,10 +12,10 @@
 
 ## Current Status
 
-- **Active phase:** Phase 7 — Mock AIService & Result Screen
+- **Active phase:** Phase 8 — Recommendation Engine
 - **Status:** Not started
-- **Last session summary:** Phase 6 completed on 2026-07-11. Rewrote `PreviewScreen` (real version: full-size `Hero`-tagged image, Retake/Confirm). Built `AiLoadingScreen`: `Hero`-continuous dimmed photo with a glowing sweep-line animation + pulsing "Analyzing your plant…" label, and a simulated 2.2s delay standing in for `AIService.analyzeImage()` (`TODO(Phase 7)`) before `pushReplacement`-ing to Result. Added a minimal placeholder `ResultScreen` (`TODO(Phase 7)`). Wired `/ai-loading` + `/result` top-level routes. Caught and fixed a real bug while verifying live: the sweep line was built as `LayoutBuilder > AnimatedBuilder > Positioned` sitting as a bare `Stack` child, which silently ignored the `Positioned` offset (screenshots showed it filling the whole screen) because `LayoutBuilder` owns its own `RenderObject`; fixed via `Positioned.fill > AnimatedBuilder > Align` instead (see `CLAUDE.md` §3 for the full explanation — worth remembering for any future Stack+Positioned+builder-widget combination). `flutter analyze` clean; `flutter test` still 16/16. Verified live end-to-end on the Android emulator in both themes: Confirm → AI Loading (sweep line confirmed rendering correctly as a thin glow band after the fix) → auto-navigate to placeholder Result with Hero continuity intact → Back to Home.
-- **Next action:** Begin Phase 7 — Mock AIService & Result Screen per `ROADMAP.md`/`MODEL_INTEGRATION.md` (`AIService` abstract contract + `PlantDiagnosisResult`/`DiagnosisSeverity` entities, `MockAIService` with curated result bank + simulated latency, DI wiring, real Result screen replacing the Phase-6 placeholder, `AiLoadingScreen` calling the real `analyzeImage()`, and persisting each scan via the Phase 4 `ScanRepository`).
+- **Last session summary:** Phase 7 completed on 2026-07-11. Implemented the `AIService` contract (`lib/services/ai/ai_service.dart`: `analyzeImage`/`isReady`, `AIServiceException`/`AIServiceErrorType`) and `PlantDiagnosisResult`/`DiagnosisSeverity` (`lib/services/ai/models/plant_diagnosis_result.dart`, with `toJson`/`fromJson`/`copyWith`) per `MODEL_INTEGRATION.md` §2–3. Built `MockAIService` (1.5–3s simulated latency, optional `forcedResultIndex` test hook, optional `failureProbability` for simulated errors, defaults to 0) drawing from a curated `mockResultBank` (2 healthy cases + 6 disease cases across 6 species — Tomato, Basil, Rose, Pepper, Cucumber, Monstera — spanning mild/moderate/severe). Wired `AIService` and `ScanRepository` into `app.dart`'s `MultiProvider`. Rewrote `AiLoadingScreen` to call the real `AIService.analyzeImage()`, persist the completed scan via `ScanRepository.addScan()` (mapping `DiagnosisSeverity` → `ScanSeverity` by name, `PlantDiagnosisResult.toJson()` → `raw_result_json`), and handle `AIServiceException` with an inline error state (title per `AIServiceErrorType`, Try Again retry) instead of a raw exception. Rewrote `ResultScreen` (+ new `ResultScreenArgs` transport class for the `/result` route's `extra`) with hero image, diagnosis label, `AppStatusBadge` (severity mapped to `AppHealthStatus`, `none`→`healthy`), animated confidence bar (`TweenAnimationBuilder`), description, and a bulleted "What we noticed" visual-symptoms list (hidden when empty, e.g. the Healthy case). `flutter analyze` clean; `flutter test` 16/16 (no test changes this phase). Verified live end-to-end on the Android emulator in both themes: Home → Camera (Take Photo, emulator synthetic feed) → Preview → Confirm → AI Loading (real mock latency + sweep animation) → Result, twice with different randomized outcomes (Pepper/Aphid Infestation/Mild/82% and Tomato/Healthy/97% with symptoms list correctly hidden) → Back to Home. Confirmed via `adb run-as` + pulling `smart_garden.db` that the scan row was persisted correctly (`diagnosis_label`, `severity`, `confidence`, full `raw_result_json` matching the served result). One environment note: the Android emulator hung completely (qemu process alive but non-responsive, near-zero CPU) mid-session and had to be force-killed and relaunched fresh — not an app issue.
+- **Next action:** Begin Phase 8 — Recommendation Engine per `ROADMAP.md` (domain rule-based mapping from `diagnosisLabel`/`severity` → structured recommendation covering watering/light/treatment/urgency, a local curated content bank covering all 8 Phase 7 mock outcomes, a Recommendation screen/section linked from Result, verifying every mock diagnosis outcome yields a sensible non-empty recommendation with no "no data" fallback needed).
 
 ---
 
@@ -97,15 +97,15 @@
 - [x] AI Loading: calls into `AIService` (stub result acceptable if Phase 7 not yet done)
 - [x] Verified: Confirm → animation → navigation forward works end-to-end
 
-## Phase 7 — Mock AIService & Result Screen
-- [ ] `AIService` abstract contract defined per `MODEL_INTEGRATION.md`
-- [ ] `PlantDiagnosisResult` and related entities defined
-- [ ] `MockAIService` implemented with simulated latency
-- [ ] Mock result bank: multiple species, healthy case, multiple disease cases, varied confidence/severity
-- [ ] DI wiring: `AIService` injected as interface everywhere consumed
-- [ ] Result screen: diagnosis label, confidence indicator, severity badge, description, hero image
-- [ ] Scan persisted to `scans` table on completion
-- [ ] Verified: full Home → Camera/Gallery → Preview → AI Loading → Result flow works with mock data
+## Phase 7 — Mock AIService & Result Screen ✅ COMPLETED (2026-07-11)
+- [x] `AIService` abstract contract defined per `MODEL_INTEGRATION.md`
+- [x] `PlantDiagnosisResult` and related entities defined
+- [x] `MockAIService` implemented with simulated latency
+- [x] Mock result bank: multiple species, healthy case, multiple disease cases, varied confidence/severity
+- [x] DI wiring: `AIService` injected as interface everywhere consumed
+- [x] Result screen: diagnosis label, confidence indicator, severity badge, description, hero image
+- [x] Scan persisted to `scans` table on completion
+- [x] Verified: full Home → Camera/Gallery → Preview → AI Loading → Result flow works with mock data
 
 ## Phase 8 — Recommendation Engine
 - [ ] Domain rule-based mapping: diagnosis → recommendation (watering, light, treatment, urgency)

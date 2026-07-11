@@ -16,6 +16,11 @@ import 'features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import 'features/onboarding/domain/repositories/onboarding_repository.dart';
 import 'features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'features/onboarding/domain/usecases/complete_onboarding.dart';
+import 'features/scan_history/data/datasources/scan_local_datasource.dart';
+import 'features/scan_history/data/repositories/scan_repository_impl.dart';
+import 'features/scan_history/domain/repositories/scan_repository.dart';
+import 'services/ai/ai_service.dart';
+import 'services/ai/mock_ai_service.dart';
 import 'services/storage/image_storage_service.dart';
 
 class SmartGardenApp extends StatelessWidget {
@@ -33,6 +38,10 @@ class SmartGardenApp extends StatelessWidget {
         CameraCaptureRepositoryImpl(imageStorageService);
     final GalleryRepository galleryRepository =
         GalleryRepositoryImpl(imageStorageService);
+    final AIService aiService = MockAIService();
+    final ScanRepository scanRepository = ScanRepositoryImpl(
+      ScanLocalDataSource(),
+    );
 
     return MultiProvider(
       providers: [
@@ -49,6 +58,8 @@ class SmartGardenApp extends StatelessWidget {
         Provider<StorePickedPhoto>(
           create: (_) => StorePickedPhoto(galleryRepository),
         ),
+        Provider<AIService>(create: (_) => aiService),
+        Provider<ScanRepository>(create: (_) => scanRepository),
       ],
       child: Consumer<ThemeModeController>(
         builder: (context, themeController, _) {

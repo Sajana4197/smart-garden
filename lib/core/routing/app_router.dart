@@ -60,8 +60,10 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.result,
-      builder: (context, state) =>
-          ResultScreen(imagePath: state.extra! as String),
+      builder: (context, state) {
+        final args = state.extra! as ResultScreenArgs;
+        return ResultScreen(imagePath: args.imagePath, result: args.result);
+      },
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
