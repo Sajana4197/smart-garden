@@ -16,12 +16,21 @@ import 'features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import 'features/onboarding/domain/repositories/onboarding_repository.dart';
 import 'features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'features/onboarding/domain/usecases/complete_onboarding.dart';
+import 'features/my_garden/data/datasources/plant_local_datasource.dart';
+import 'features/my_garden/data/repositories/plant_repository_impl.dart';
+import 'features/my_garden/domain/repositories/plant_repository.dart';
+import 'features/my_garden/domain/usecases/delete_plant.dart';
+import 'features/my_garden/domain/usecases/get_all_plants.dart';
+import 'features/my_garden/domain/usecases/save_plant_to_garden.dart';
+import 'features/my_garden/domain/usecases/update_plant.dart';
+import 'features/my_garden/presentation/providers/my_garden_provider.dart';
 import 'features/recommendation/data/repositories/recommendation_repository_impl.dart';
 import 'features/recommendation/domain/repositories/recommendation_repository.dart';
 import 'features/recommendation/domain/usecases/get_care_recommendation.dart';
 import 'features/scan_history/data/datasources/scan_local_datasource.dart';
 import 'features/scan_history/data/repositories/scan_repository_impl.dart';
 import 'features/scan_history/domain/repositories/scan_repository.dart';
+import 'features/scan_history/domain/usecases/get_scans_for_plant.dart';
 import 'services/ai/ai_service.dart';
 import 'services/ai/mock_ai_service.dart';
 import 'services/storage/image_storage_service.dart';
@@ -47,6 +56,9 @@ class SmartGardenApp extends StatelessWidget {
     );
     final RecommendationRepository recommendationRepository =
         RecommendationRepositoryImpl();
+    final PlantRepository plantRepository = PlantRepositoryImpl(
+      PlantLocalDataSource(),
+    );
 
     return MultiProvider(
       providers: [
@@ -67,6 +79,27 @@ class SmartGardenApp extends StatelessWidget {
         Provider<ScanRepository>(create: (_) => scanRepository),
         Provider<GetCareRecommendation>(
           create: (_) => GetCareRecommendation(recommendationRepository),
+        ),
+        Provider<GetAllPlants>(
+          create: (_) => GetAllPlants(plantRepository),
+        ),
+        Provider<UpdatePlant>(
+          create: (_) => UpdatePlant(plantRepository),
+        ),
+        Provider<DeletePlant>(
+          create: (_) => DeletePlant(plantRepository),
+        ),
+        Provider<SavePlantToGarden>(
+          create: (_) => SavePlantToGarden(plantRepository, scanRepository),
+        ),
+        Provider<GetScansForPlant>(
+          create: (_) => GetScansForPlant(scanRepository),
+        ),
+        ChangeNotifierProvider<MyGardenProvider>(
+          create: (context) => MyGardenProvider(
+            context.read<GetAllPlants>(),
+            context.read<DeletePlant>(),
+          )..loadPlants(),
         ),
       ],
       child: Consumer<ThemeModeController>(

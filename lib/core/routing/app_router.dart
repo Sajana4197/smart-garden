@@ -5,7 +5,9 @@ import 'main_shell_screen.dart';
 import '../../features/ai_loading/presentation/screens/ai_loading_screen.dart';
 import '../../features/camera/presentation/screens/camera_screen.dart';
 import '../../features/home_dashboard/presentation/screens/home_dashboard_screen.dart';
+import '../../features/my_garden/domain/entities/plant.dart';
 import '../../features/my_garden/presentation/screens/my_garden_screen.dart';
+import '../../features/my_garden/presentation/screens/plant_detail_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/plant_health_dashboard/presentation/screens/plant_health_dashboard_screen.dart';
 import '../../features/preview/presentation/screens/preview_screen.dart';
@@ -28,6 +30,7 @@ abstract final class AppRoutes {
   static const String aiLoading = '/ai-loading';
   static const String result = '/result';
   static const String recommendation = '/recommendation';
+  static const String plantDetail = '/my-garden/detail';
   static const String debugGallery = '/debug/gallery';
 }
 
@@ -64,7 +67,11 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.result,
       builder: (context, state) {
         final args = state.extra! as ResultScreenArgs;
-        return ResultScreen(imagePath: args.imagePath, result: args.result);
+        return ResultScreen(
+          imagePath: args.imagePath,
+          result: args.result,
+          scanId: args.scanId,
+        );
       },
     ),
     GoRoute(
@@ -76,6 +83,11 @@ final GoRouter appRouter = GoRouter(
           result: args.result,
         );
       },
+    ),
+    GoRoute(
+      path: AppRoutes.plantDetail,
+      builder: (context, state) =>
+          PlantDetailScreen(plant: state.extra! as Plant),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>

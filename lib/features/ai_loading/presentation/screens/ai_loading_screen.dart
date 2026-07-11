@@ -55,7 +55,7 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
     final scanRepository = context.read<ScanRepository>();
     try {
       final result = await aiService.analyzeImage(File(widget.imagePath));
-      await scanRepository.addScan(
+      final scanId = await scanRepository.addScan(
         Scan(
           imagePath: widget.imagePath,
           diagnosisLabel: result.diagnosisLabel,
@@ -68,7 +68,11 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
       if (!mounted) return;
       GoRouter.of(context).pushReplacement(
         AppRoutes.result,
-        extra: ResultScreenArgs(imagePath: widget.imagePath, result: result),
+        extra: ResultScreenArgs(
+          imagePath: widget.imagePath,
+          result: result,
+          scanId: scanId,
+        ),
       );
     } on AIServiceException catch (e) {
       if (!mounted) return;
