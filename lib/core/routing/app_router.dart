@@ -13,6 +13,8 @@ import '../../features/plant_health_dashboard/presentation/screens/plant_health_
 import '../../features/preview/presentation/screens/preview_screen.dart';
 import '../../features/recommendation/presentation/screens/recommendation_screen.dart';
 import '../../features/result/presentation/screens/result_screen.dart';
+import '../../features/scan_history/domain/entities/scan.dart';
+import '../../features/scan_history/presentation/screens/scan_detail_screen.dart';
 import '../../features/scan_history/presentation/screens/scan_history_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
@@ -31,6 +33,7 @@ abstract final class AppRoutes {
   static const String result = '/result';
   static const String recommendation = '/recommendation';
   static const String plantDetail = '/my-garden/detail';
+  static const String scanDetail = '/scan-history/detail';
   static const String debugGallery = '/debug/gallery';
 }
 
@@ -88,6 +91,11 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.plantDetail,
       builder: (context, state) =>
           PlantDetailScreen(plant: state.extra! as Plant),
+    ),
+    GoRoute(
+      path: AppRoutes.scanDetail,
+      builder: (context, state) =>
+          ScanDetailScreen(scan: state.extra! as Scan),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>

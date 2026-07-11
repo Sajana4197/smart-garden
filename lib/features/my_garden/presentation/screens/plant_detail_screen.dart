@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_indicator.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
+import '../../../../core/routing/app_router.dart';
 import '../../../home_dashboard/presentation/widgets/scan_source_sheet.dart';
 import '../../../scan_history/domain/entities/scan.dart';
 import '../../../scan_history/domain/usecases/get_scans_for_plant.dart';
@@ -213,7 +214,11 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
             )
           else
             for (final scan in _scans) ...[
-              _ScanHistoryTile(scan: scan),
+              _ScanHistoryTile(
+                scan: scan,
+                onTap: () =>
+                    context.push(AppRoutes.scanDetail, extra: scan),
+              ),
               const SizedBox(height: AppSpacing.sm),
             ],
         ],
@@ -223,9 +228,10 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
 }
 
 class _ScanHistoryTile extends StatelessWidget {
-  const _ScanHistoryTile({required this.scan});
+  const _ScanHistoryTile({required this.scan, required this.onTap});
 
   final Scan scan;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -233,6 +239,7 @@ class _ScanHistoryTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return AppCard(
+      onTap: onTap,
       child: Row(
         children: [
           ClipRRect(

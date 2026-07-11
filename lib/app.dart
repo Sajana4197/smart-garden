@@ -21,6 +21,7 @@ import 'features/my_garden/data/repositories/plant_repository_impl.dart';
 import 'features/my_garden/domain/repositories/plant_repository.dart';
 import 'features/my_garden/domain/usecases/delete_plant.dart';
 import 'features/my_garden/domain/usecases/get_all_plants.dart';
+import 'features/my_garden/domain/usecases/get_plant_by_id.dart';
 import 'features/my_garden/domain/usecases/save_plant_to_garden.dart';
 import 'features/my_garden/domain/usecases/update_plant.dart';
 import 'features/my_garden/presentation/providers/my_garden_provider.dart';
@@ -30,7 +31,9 @@ import 'features/recommendation/domain/usecases/get_care_recommendation.dart';
 import 'features/scan_history/data/datasources/scan_local_datasource.dart';
 import 'features/scan_history/data/repositories/scan_repository_impl.dart';
 import 'features/scan_history/domain/repositories/scan_repository.dart';
+import 'features/scan_history/domain/usecases/get_all_scans.dart';
 import 'features/scan_history/domain/usecases/get_scans_for_plant.dart';
+import 'features/scan_history/presentation/providers/scan_history_provider.dart';
 import 'services/ai/ai_service.dart';
 import 'services/ai/mock_ai_service.dart';
 import 'services/storage/image_storage_service.dart';
@@ -89,17 +92,27 @@ class SmartGardenApp extends StatelessWidget {
         Provider<DeletePlant>(
           create: (_) => DeletePlant(plantRepository),
         ),
+        Provider<GetPlantById>(
+          create: (_) => GetPlantById(plantRepository),
+        ),
         Provider<SavePlantToGarden>(
           create: (_) => SavePlantToGarden(plantRepository, scanRepository),
         ),
         Provider<GetScansForPlant>(
           create: (_) => GetScansForPlant(scanRepository),
         ),
+        Provider<GetAllScans>(
+          create: (_) => GetAllScans(scanRepository),
+        ),
         ChangeNotifierProvider<MyGardenProvider>(
           create: (context) => MyGardenProvider(
             context.read<GetAllPlants>(),
             context.read<DeletePlant>(),
           )..loadPlants(),
+        ),
+        ChangeNotifierProvider<ScanHistoryProvider>(
+          create: (context) =>
+              ScanHistoryProvider(context.read<GetAllScans>())..loadScans(),
         ),
       ],
       child: Consumer<ThemeModeController>(

@@ -12,6 +12,7 @@ import '../../../../services/ai/ai_service.dart';
 import '../../../result/presentation/screens/result_screen.dart';
 import '../../../scan_history/domain/entities/scan.dart';
 import '../../../scan_history/domain/repositories/scan_repository.dart';
+import '../../../scan_history/presentation/providers/scan_history_provider.dart';
 
 /// Branded "analyzing your plant" state — a scanning-line sweep over the
 /// just-captured photo, per UI_GUIDELINES.md §5. Keeps the same Hero tag as
@@ -66,6 +67,7 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
         ),
       );
       if (!mounted) return;
+      context.read<ScanHistoryProvider>().loadScans();
       GoRouter.of(context).pushReplacement(
         AppRoutes.result,
         extra: ResultScreenArgs(
