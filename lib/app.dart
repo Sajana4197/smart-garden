@@ -5,6 +5,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_mode_controller.dart';
+import 'features/daily_tips/data/datasources/daily_tip_state_local_datasource.dart';
+import 'features/daily_tips/data/datasources/tip_bank_datasource.dart';
+import 'features/daily_tips/data/repositories/daily_tip_repository_impl.dart';
+import 'features/daily_tips/domain/repositories/daily_tip_repository.dart';
+import 'features/daily_tips/domain/usecases/get_all_tips.dart';
+import 'features/daily_tips/domain/usecases/get_daily_tip.dart';
+import 'features/daily_tips/presentation/providers/daily_tip_provider.dart';
 import 'features/camera/data/repositories/camera_capture_repository_impl.dart';
 import 'features/camera/domain/repositories/camera_capture_repository.dart';
 import 'features/camera/domain/usecases/store_captured_photo.dart';
@@ -76,6 +83,10 @@ class SmartGardenApp extends StatelessWidget {
       WeatherRemoteDataSource(),
       WeatherLocalDataSource(prefs),
     );
+    final DailyTipRepository dailyTipRepository = DailyTipRepositoryImpl(
+      TipBankDataSource(),
+      DailyTipStateLocalDataSource(),
+    );
 
     return MultiProvider(
       providers: [
@@ -139,6 +150,16 @@ class SmartGardenApp extends StatelessWidget {
             context.read<GetCurrentWeather>(),
             context.read<GetCachedWeather>(),
           )..loadWeather(),
+        ),
+        Provider<GetDailyTip>(
+          create: (_) => GetDailyTip(dailyTipRepository),
+        ),
+        Provider<GetAllTips>(
+          create: (_) => GetAllTips(dailyTipRepository),
+        ),
+        ChangeNotifierProvider<DailyTipProvider>(
+          create: (context) =>
+              DailyTipProvider(context.read<GetDailyTip>())..loadTip(),
         ),
       ],
       child: Consumer<ThemeModeController>(

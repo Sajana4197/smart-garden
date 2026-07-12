@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,5 +42,23 @@ void main() {
 
     expect(find.text('Skip'), findsNothing);
     expect(find.byTooltip('Component gallery (debug)'), findsOneWidget);
+  });
+
+  testWidgets('Tapping the daily tip card navigates to All Tips', (
+    WidgetTester tester,
+  ) async {
+    await prefs.setBool('onboarding_complete', true);
+
+    await tester.pumpWidget(SmartGardenApp(prefs: prefs));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    expect(find.byKey(const Key('dailyTipCard')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('dailyTipCard')));
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+
+    expect(find.text('All Tips'), findsOneWidget);
   });
 }

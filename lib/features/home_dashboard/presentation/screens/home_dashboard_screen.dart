@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/routing/app_router.dart';
@@ -8,6 +9,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../../../core/widgets/section_header.dart';
+import '../../../daily_tips/presentation/providers/daily_tip_provider.dart';
 import '../../../weather/presentation/widgets/weather_card.dart';
 import '../widgets/scan_source_sheet.dart';
 
@@ -80,8 +82,27 @@ class _DailyTipCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final provider = context.watch<DailyTipProvider>();
+
+    final String title;
+    final String body;
+    if (provider.isLoading && provider.tip == null) {
+      title = 'Tip of the Day';
+      body = 'Loading...';
+    } else if (provider.tip != null) {
+      title = provider.tip!.title;
+      body = provider.tip!.body;
+    } else {
+      // provider.hasError with no cached tip — still show something useful
+      // rather than a blank card (no dedicated error UI for a non-critical
+      // dashboard widget).
+      title = 'Tip of the Day';
+      body = 'Keep your plants healthy with regular care and attention.';
+    }
 
     return AppCard(
+      key: const Key('dailyTipCard'),
+      onTap: () => context.push(AppRoutes.allTips),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -91,11 +112,10 @@ class _DailyTipCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Tip of the Day', style: textTheme.titleMedium),
+                Text(title, style: textTheme.titleMedium),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  'Rotate your potted plants a quarter turn every week so '
-                  'all sides get even sunlight.',
+                  body,
                   style: textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -103,6 +123,7 @@ class _DailyTipCard extends StatelessWidget {
               ],
             ),
           ),
+          Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
         ],
       ),
     );

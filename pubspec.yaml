@@ -80,6 +80,11 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 
+  # Local curated tip bank (Phase 12 — Daily Plant Tips), read via
+  # TipBankDataSource instead of fetched over the network — offline-first.
+  assets:
+    - assets/tips/plant_tips.json
+
   # Bundled locally (not fetched via google_fonts at runtime) so the app's
   # theme never depends on network access — see CLAUDE.md Locked Decisions.
   fonts:

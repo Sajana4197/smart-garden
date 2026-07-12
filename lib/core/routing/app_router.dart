@@ -4,6 +4,7 @@ import '../debug/component_gallery_screen.dart';
 import 'main_shell_screen.dart';
 import '../../features/ai_loading/presentation/screens/ai_loading_screen.dart';
 import '../../features/camera/presentation/screens/camera_screen.dart';
+import '../../features/daily_tips/presentation/screens/all_tips_screen.dart';
 import '../../features/home_dashboard/presentation/screens/home_dashboard_screen.dart';
 import '../../features/my_garden/domain/entities/plant.dart';
 import '../../features/my_garden/presentation/screens/my_garden_screen.dart';
@@ -34,6 +35,7 @@ abstract final class AppRoutes {
   static const String recommendation = '/recommendation';
   static const String plantDetail = '/my-garden/detail';
   static const String scanDetail = '/scan-history/detail';
+  static const String allTips = '/tips';
   static const String debugGallery = '/debug/gallery';
 }
 
@@ -96,6 +98,10 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.scanDetail,
       builder: (context, state) =>
           ScanDetailScreen(scan: state.extra! as Scan),
+    ),
+    GoRoute(
+      path: AppRoutes.allTips,
+      builder: (context, state) => const AllTipsScreen(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
