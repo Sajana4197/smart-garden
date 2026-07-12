@@ -12,6 +12,11 @@ import 'features/daily_tips/domain/repositories/daily_tip_repository.dart';
 import 'features/daily_tips/domain/usecases/get_all_tips.dart';
 import 'features/daily_tips/domain/usecases/get_daily_tip.dart';
 import 'features/daily_tips/presentation/providers/daily_tip_provider.dart';
+import 'features/voice/data/repositories/speech_repository_impl.dart';
+import 'features/voice/domain/repositories/speech_repository.dart';
+import 'features/voice/domain/usecases/pause_speech.dart';
+import 'features/voice/domain/usecases/speak_text.dart';
+import 'features/voice/domain/usecases/stop_speech.dart';
 import 'features/camera/data/repositories/camera_capture_repository_impl.dart';
 import 'features/camera/domain/repositories/camera_capture_repository.dart';
 import 'features/camera/domain/usecases/store_captured_photo.dart';
@@ -87,6 +92,7 @@ class SmartGardenApp extends StatelessWidget {
       TipBankDataSource(),
       DailyTipStateLocalDataSource(),
     );
+    final SpeechRepository speechRepository = SpeechRepositoryImpl();
 
     return MultiProvider(
       providers: [
@@ -160,6 +166,16 @@ class SmartGardenApp extends StatelessWidget {
         ChangeNotifierProvider<DailyTipProvider>(
           create: (context) =>
               DailyTipProvider(context.read<GetDailyTip>())..loadTip(),
+        ),
+        Provider<SpeechRepository>(create: (_) => speechRepository),
+        Provider<SpeakText>(
+          create: (_) => SpeakText(speechRepository),
+        ),
+        Provider<PauseSpeech>(
+          create: (_) => PauseSpeech(speechRepository),
+        ),
+        Provider<StopSpeech>(
+          create: (_) => StopSpeech(speechRepository),
         ),
       ],
       child: Consumer<ThemeModeController>(

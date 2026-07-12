@@ -17,6 +17,7 @@ import '../../../my_garden/domain/usecases/save_plant_to_garden.dart';
 import '../../../my_garden/presentation/providers/my_garden_provider.dart';
 import '../../../my_garden/presentation/widgets/save_to_garden_dialog.dart';
 import '../../../recommendation/presentation/screens/recommendation_screen.dart';
+import '../../../voice/presentation/widgets/read_aloud_controls.dart';
 
 /// Bundles the scan image path, diagnosis, and the persisted scan's DB id
 /// for the `/result` route's `extra` — constructed by `AiLoadingScreen`
@@ -73,6 +74,18 @@ class _ResultScreenState extends State<ResultScreen> {
         DiagnosisSeverity.moderate => PlantHealthStatus.moderate,
         DiagnosisSeverity.severe => PlantHealthStatus.severe,
       };
+
+  String get _speechText {
+    final result = widget.result;
+    final buffer = StringBuffer()
+      ..write('${result.diagnosisLabel} for your ${result.plantCommonName}. ')
+      ..write('Confidence: ${(result.confidence * 100).round()} percent. ')
+      ..write(result.description);
+    if (result.visualSymptoms.isNotEmpty) {
+      buffer.write(' What we noticed: ${result.visualSymptoms.join('. ')}.');
+    }
+    return buffer.toString();
+  }
 
   Future<void> _saveToGarden() async {
     final dialogResult = await SaveToGardenDialog.show(
@@ -173,6 +186,8 @@ class _ResultScreenState extends State<ResultScreen> {
               ],
             ),
           ),
+          const SizedBox(height: AppSpacing.md),
+          ReadAloudControls(text: _speechText),
           const SizedBox(height: AppSpacing.md),
           Text('About this diagnosis', style: textTheme.titleMedium),
           const SizedBox(height: AppSpacing.xs),

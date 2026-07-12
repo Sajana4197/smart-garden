@@ -11,6 +11,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../../../services/ai/ai_service.dart';
+import '../../../voice/presentation/widgets/read_aloud_controls.dart';
 import '../../domain/entities/care_recommendation.dart';
 import '../../domain/usecases/get_care_recommendation.dart';
 
@@ -51,6 +52,18 @@ class RecommendationScreen extends StatelessWidget {
         RecommendationUrgency.monitor => 'Monitor',
         RecommendationUrgency.urgent => 'Urgent',
       };
+
+  static String _speechText(
+    PlantDiagnosisResult result,
+    CareRecommendation recommendation,
+  ) {
+    final buffer = StringBuffer()
+      ..write('Care recommendations for ${result.diagnosisLabel}. ')
+      ..write('Watering: ${recommendation.wateringAdvice} ')
+      ..write('Light: ${recommendation.lightAdvice} ')
+      ..write('Treatment steps: ${recommendation.treatmentSteps.join('. ')}.');
+    return buffer.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +113,8 @@ class RecommendationScreen extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: AppSpacing.lg),
+          ReadAloudControls(text: _speechText(result, recommendation)),
           const SizedBox(height: AppSpacing.lg),
           _AdviceCard(
             icon: Icons.water_drop_outlined,
