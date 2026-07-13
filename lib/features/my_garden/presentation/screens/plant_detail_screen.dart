@@ -12,6 +12,7 @@ import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../home_dashboard/presentation/widgets/scan_source_sheet.dart';
+import '../../../plant_health_dashboard/presentation/providers/plant_health_dashboard_provider.dart';
 import '../../../scan_history/domain/entities/scan.dart';
 import '../../../scan_history/domain/usecases/get_scans_for_plant.dart';
 import '../../domain/entities/plant.dart';
@@ -92,6 +93,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
     await context.read<UpdatePlant>()(updated);
     if (!mounted) return;
     context.read<MyGardenProvider>().loadPlants();
+    context.read<PlantHealthDashboardProvider>().loadSummary();
     setState(() => _plant = updated);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Plant updated')),
@@ -124,6 +126,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
     await context.read<DeletePlant>()(_plant.id!);
     if (!mounted) return;
     context.read<MyGardenProvider>().loadPlants();
+    context.read<PlantHealthDashboardProvider>().loadSummary();
     context.pop();
   }
 

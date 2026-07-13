@@ -28,6 +28,8 @@ import 'features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import 'features/onboarding/domain/repositories/onboarding_repository.dart';
 import 'features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'features/onboarding/domain/usecases/complete_onboarding.dart';
+import 'features/plant_health_dashboard/domain/usecases/get_garden_health_summary.dart';
+import 'features/plant_health_dashboard/presentation/providers/plant_health_dashboard_provider.dart';
 import 'features/my_garden/data/datasources/plant_local_datasource.dart';
 import 'features/my_garden/data/repositories/plant_repository_impl.dart';
 import 'features/my_garden/domain/repositories/plant_repository.dart';
@@ -144,6 +146,15 @@ class SmartGardenApp extends StatelessWidget {
         ChangeNotifierProvider<ScanHistoryProvider>(
           create: (context) =>
               ScanHistoryProvider(context.read<GetAllScans>())..loadScans(),
+        ),
+        Provider<GetGardenHealthSummary>(
+          create: (_) =>
+              GetGardenHealthSummary(plantRepository, scanRepository),
+        ),
+        ChangeNotifierProvider<PlantHealthDashboardProvider>(
+          create: (context) => PlantHealthDashboardProvider(
+            context.read<GetGardenHealthSummary>(),
+          )..loadSummary(),
         ),
         Provider<GetCurrentWeather>(
           create: (_) => GetCurrentWeather(locationRepository, weatherRepository),

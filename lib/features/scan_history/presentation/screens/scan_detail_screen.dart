@@ -18,6 +18,7 @@ import '../../../my_garden/domain/usecases/get_plant_by_id.dart';
 import '../../../my_garden/domain/usecases/save_plant_to_garden.dart';
 import '../../../my_garden/presentation/providers/my_garden_provider.dart';
 import '../../../my_garden/presentation/widgets/save_to_garden_dialog.dart';
+import '../../../plant_health_dashboard/presentation/providers/plant_health_dashboard_provider.dart';
 import '../../../recommendation/presentation/screens/recommendation_screen.dart';
 import '../../domain/entities/scan.dart';
 import '../providers/scan_history_provider.dart';
@@ -93,6 +94,7 @@ class _ScanDetailScreenState extends State<ScanDetailScreen> {
     if (!mounted) return;
     context.read<MyGardenProvider>().loadPlants();
     context.read<ScanHistoryProvider>().loadScans();
+    context.read<PlantHealthDashboardProvider>().loadSummary();
     setState(() {
       _isSaving = false;
       _isSaved = true;

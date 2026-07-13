@@ -16,6 +16,7 @@ import '../../../my_garden/domain/entities/plant.dart';
 import '../../../my_garden/domain/usecases/save_plant_to_garden.dart';
 import '../../../my_garden/presentation/providers/my_garden_provider.dart';
 import '../../../my_garden/presentation/widgets/save_to_garden_dialog.dart';
+import '../../../plant_health_dashboard/presentation/providers/plant_health_dashboard_provider.dart';
 import '../../../recommendation/presentation/screens/recommendation_screen.dart';
 import '../../../voice/presentation/widgets/read_aloud_controls.dart';
 
@@ -107,6 +108,7 @@ class _ResultScreenState extends State<ResultScreen> {
     );
     if (!mounted) return;
     context.read<MyGardenProvider>().loadPlants();
+    context.read<PlantHealthDashboardProvider>().loadSummary();
     setState(() {
       _isSaving = false;
       _isSaved = true;
