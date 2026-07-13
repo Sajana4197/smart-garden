@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +6,7 @@ import '../../../../core/routing/app_router.dart';
 import '../../../../core/widgets/app_bar.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_secondary_button.dart';
+import '../../../../core/widgets/safe_file_image.dart';
 
 class PreviewScreen extends StatelessWidget {
   const PreviewScreen({super.key, required this.imagePath});
@@ -28,7 +27,7 @@ class PreviewScreen extends StatelessWidget {
                 tag: imagePath,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                  child: Image.file(File(imagePath), fit: BoxFit.cover),
+                  child: SafeFileImage(path: imagePath),
                 ),
               ),
             ),

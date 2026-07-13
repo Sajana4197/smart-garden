@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +9,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/error_state_widget.dart';
+import '../../../../core/widgets/safe_file_image.dart';
 import '../../../../core/widgets/skeleton_box.dart';
 import '../../../../core/widgets/staggered_fade_in.dart';
 import '../../domain/entities/scan.dart';
@@ -126,12 +125,7 @@ class _ScanListTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-            child: Image.file(
-              File(scan.imagePath),
-              width: 56,
-              height: 56,
-              fit: BoxFit.cover,
-            ),
+            child: SafeFileImage(path: scan.imagePath, width: 56, height: 56),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(

@@ -8,8 +8,11 @@ import '../../../../core/widgets/app_bar.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
+import '../../../../core/widgets/safe_file_image.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../../../daily_tips/presentation/providers/daily_tip_provider.dart';
+import '../../../scan_history/domain/entities/scan.dart';
+import '../../../scan_history/presentation/providers/scan_history_provider.dart';
 import '../../../weather/presentation/widgets/weather_card.dart';
 import '../widgets/scan_source_sheet.dart';
 
@@ -130,47 +133,108 @@ class _DailyTipCard extends StatelessWidget {
   }
 }
 
-class _RecentActivityEntry {
-  const _RecentActivityEntry(this.name, this.status, this.timeAgo);
+AppHealthStatus _statusFor(ScanSeverity severity) => switch (severity) {
+      ScanSeverity.none => AppHealthStatus.healthy,
+      ScanSeverity.mild => AppHealthStatus.mild,
+      ScanSeverity.moderate => AppHealthStatus.moderate,
+      ScanSeverity.severe => AppHealthStatus.severe,
+    };
 
-  final String name;
-  final AppHealthStatus status;
-  final String timeAgo;
+String _timeAgo(DateTime dateTime) {
+  final diff = DateTime.now().difference(dateTime);
+  if (diff.inDays >= 7) {
+    final weeks = diff.inDays ~/ 7;
+    return weeks == 1 ? '1 week ago' : '$weeks weeks ago';
+  }
+  if (diff.inDays >= 1) {
+    return diff.inDays == 1 ? '1 day ago' : '${diff.inDays} days ago';
+  }
+  if (diff.inHours >= 1) {
+    return diff.inHours == 1 ? '1 hour ago' : '${diff.inHours} hours ago';
+  }
+  if (diff.inMinutes >= 1) {
+    return diff.inMinutes == 1 ? '1 minute ago' : '${diff.inMinutes} minutes ago';
+  }
+  return 'Just now';
 }
 
+/// Shows the actual most-recent scans (via `ScanHistoryProvider.
+/// recentScans`, deliberately not its filtered `scans` getter — see that
+/// getter's doc comment) rather than the Phase 3 static placeholder this
+/// replaced. A brand-new user with an empty DB sees a genuine empty state,
+/// not fake plants they never scanned (ROADMAP.md Phase 17).
 class _RecentActivityList extends StatelessWidget {
   const _RecentActivityList();
 
-  static const _entries = [
-    _RecentActivityEntry('Monstera Deliciosa', AppHealthStatus.healthy, '2 days ago'),
-    _RecentActivityEntry('Basil', AppHealthStatus.mild, '5 days ago'),
-    _RecentActivityEntry('Fiddle Leaf Fig', AppHealthStatus.moderate, '1 week ago'),
-  ];
+  static const int _maxEntries = 3;
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<ScanHistoryProvider>();
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
+    // No spinner here (unlike a dedicated screen's initial-load state) —
+    // this is a small, non-critical dashboard summary, same reasoning as
+    // `_DailyTipCard`'s static "Loading..." text: a `CircularProgressIndicator`
+    // is a never-settling indeterminate animation, and this widget's loading
+    // window should be brief enough that plain text reads fine.
+    if (provider.isLoading && !provider.hasAnyScans) {
+      return AppCard(
+        child: Row(
+          children: [
+            Icon(Icons.eco_outlined, color: colorScheme.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.md),
+            Text('Loading recent activity…', style: textTheme.bodyMedium),
+          ],
+        ),
+      );
+    }
+
+    final recentScans = provider.recentScans.take(_maxEntries).toList();
+    if (recentScans.isEmpty) {
+      return AppCard(
+        child: Row(
+          children: [
+            Icon(Icons.eco_outlined, color: colorScheme.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                'Scan a plant to see your recent activity here.',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
       children: [
-        for (final entry in _entries) ...[
+        for (final (index, scan) in recentScans.indexed) ...[
           AppCard(
+            onTap: () => context.push(AppRoutes.scanDetail, extra: scan),
             child: Row(
               children: [
-                CircleAvatar(
-                  backgroundColor: colorScheme.surfaceContainerHighest,
-                  foregroundColor: colorScheme.onSurfaceVariant,
-                  child: const Icon(Icons.eco_outlined),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: SafeFileImage(path: scan.imagePath, width: 40, height: 40),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(entry.name, style: textTheme.titleMedium),
                       Text(
-                        entry.timeAgo,
+                        scan.diagnosisLabel,
+                        style: textTheme.titleMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        _timeAgo(scan.scannedAt),
                         style: textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -178,11 +242,11 @@ class _RecentActivityList extends StatelessWidget {
                     ],
                   ),
                 ),
-                AppStatusBadge(status: entry.status),
+                AppStatusBadge(status: _statusFor(scan.severity)),
               ],
             ),
           ),
-          if (entry != _entries.last) const SizedBox(height: AppSpacing.sm),
+          if (index != recentScans.length - 1) const SizedBox(height: AppSpacing.sm),
         ],
       ],
     );

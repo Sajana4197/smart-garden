@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +8,7 @@ import '../../../../core/widgets/app_bar.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/error_state_widget.dart';
+import '../../../../core/widgets/safe_file_image.dart';
 import '../../../../core/widgets/skeleton_box.dart';
 import '../../../../core/widgets/staggered_fade_in.dart';
 import '../../domain/entities/plant.dart';
@@ -131,7 +130,7 @@ class _PlantGridTile extends StatelessWidget {
                 Positioned.fill(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                    child: Image.file(File(plant.imagePath), fit: BoxFit.cover),
+                    child: SafeFileImage(path: plant.imagePath),
                   ),
                 ),
                 Positioned(

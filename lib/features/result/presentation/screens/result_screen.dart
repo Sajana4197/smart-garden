@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +9,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_secondary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
+import '../../../../core/widgets/safe_file_image.dart';
 import '../../../../services/ai/ai_service.dart';
 import '../../../my_garden/domain/entities/plant.dart';
 import '../../../my_garden/domain/usecases/save_plant_to_garden.dart';
@@ -133,7 +132,7 @@ class _ResultScreenState extends State<ResultScreen> {
               tag: widget.imagePath,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-                child: Image.file(File(widget.imagePath), fit: BoxFit.cover),
+                child: SafeFileImage(path: widget.imagePath),
               ),
             ),
           ),

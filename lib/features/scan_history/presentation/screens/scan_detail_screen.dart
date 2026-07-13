@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +11,8 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_secondary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
+import '../../../../core/widgets/error_state_widget.dart';
+import '../../../../core/widgets/safe_file_image.dart';
 import '../../../../services/ai/ai_service.dart';
 import '../../../my_garden/domain/entities/plant.dart';
 import '../../../my_garden/domain/usecases/get_plant_by_id.dart';
@@ -60,23 +61,33 @@ class ScanDetailScreen extends StatefulWidget {
 }
 
 class _ScanDetailScreenState extends State<ScanDetailScreen> {
-  late final PlantDiagnosisResult _result;
+  PlantDiagnosisResult? _result;
   bool _isSaving = false;
   bool _isSaved = false;
 
   @override
   void initState() {
     super.initState();
-    _result = PlantDiagnosisResult.fromJson(
-      jsonDecode(widget.scan.rawResultJson) as Map<String, Object?>,
-    );
+    // `rawResultJson` is app-written, but never trust historically-persisted
+    // data forever — a future result-shape change (e.g. Phase 18's TFLite
+    // swap) could make an old scan's JSON unparseable. Fall back to an
+    // error state rather than crashing the whole screen.
+    try {
+      _result = PlantDiagnosisResult.fromJson(
+        jsonDecode(widget.scan.rawResultJson) as Map<String, Object?>,
+      );
+    } catch (_) {
+      _result = null;
+    }
     _isSaved = widget.scan.plantId != null;
   }
 
   Future<void> _saveToGarden() async {
+    final result = _result;
+    if (result == null) return;
     final dialogResult = await SaveToGardenDialog.show(
       context,
-      initialSpecies: _result.plantCommonName,
+      initialSpecies: result.plantCommonName,
     );
     if (dialogResult == null || !mounted) return;
 
@@ -88,7 +99,7 @@ class _ScanDetailScreenState extends State<ScanDetailScreen> {
       species: dialogResult.species,
       imagePath: widget.scan.imagePath,
       notes: dialogResult.notes,
-      status: _plantStatusFor(_result.severity),
+      status: _plantStatusFor(result.severity),
       sourceScanId: widget.scan.id!,
     );
     if (!mounted) return;
@@ -113,8 +124,19 @@ class _ScanDetailScreenState extends State<ScanDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final scan = widget.scan;
+    final result = _result;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+
+    if (result == null) {
+      return Scaffold(
+        appBar: const SmartGardenAppBar(title: 'Scan Detail'),
+        body: const ErrorStateWidget(
+          title: 'Could not load this scan',
+          message: "This scan's saved diagnosis data is unreadable.",
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: const SmartGardenAppBar(title: 'Scan Detail'),
@@ -125,7 +147,7 @@ class _ScanDetailScreenState extends State<ScanDetailScreen> {
             aspectRatio: 4 / 3,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-              child: Image.file(File(scan.imagePath), fit: BoxFit.cover),
+              child: SafeFileImage(path: scan.imagePath),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -133,17 +155,17 @@ class _ScanDetailScreenState extends State<ScanDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(_result.diagnosisLabel, style: textTheme.headlineMedium),
+                child: Text(result.diagnosisLabel, style: textTheme.headlineMedium),
               ),
               const SizedBox(width: AppSpacing.sm),
-              AppStatusBadge(status: _healthStatusFor(_result.severity)),
+              AppStatusBadge(status: _healthStatusFor(result.severity)),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            _result.plantSpeciesLatin != null
-                ? '${_result.plantCommonName} · ${_result.plantSpeciesLatin}'
-                : _result.plantCommonName,
+            result.plantSpeciesLatin != null
+                ? '${result.plantCommonName} · ${result.plantSpeciesLatin}'
+                : result.plantCommonName,
             style: textTheme.titleMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
               fontStyle: FontStyle.italic,
@@ -166,7 +188,7 @@ class _ScanDetailScreenState extends State<ScanDetailScreen> {
                     Text('Confidence', style: textTheme.labelLarge),
                     const Spacer(),
                     Text(
-                      '${(_result.confidence * 100).round()}%',
+                      '${(result.confidence * 100).round()}%',
                       style: textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -177,7 +199,7 @@ class _ScanDetailScreenState extends State<ScanDetailScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
                   child: LinearProgressIndicator(
-                    value: _result.confidence,
+                    value: result.confidence,
                     minHeight: 8,
                   ),
                 ),
@@ -187,12 +209,12 @@ class _ScanDetailScreenState extends State<ScanDetailScreen> {
           const SizedBox(height: AppSpacing.md),
           Text('About this diagnosis', style: textTheme.titleMedium),
           const SizedBox(height: AppSpacing.xs),
-          Text(_result.description, style: textTheme.bodyMedium),
-          if (_result.visualSymptoms.isNotEmpty) ...[
+          Text(result.description, style: textTheme.bodyMedium),
+          if (result.visualSymptoms.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
             Text('What we noticed', style: textTheme.titleMedium),
             const SizedBox(height: AppSpacing.xs),
-            ..._result.visualSymptoms.map(
+            ...result.visualSymptoms.map(
               (symptom) => Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                 child: Row(
@@ -221,7 +243,7 @@ class _ScanDetailScreenState extends State<ScanDetailScreen> {
               AppRoutes.recommendation,
               extra: RecommendationScreenArgs(
                 imagePath: scan.imagePath,
-                result: _result,
+                result: result,
               ),
             ),
           ),

@@ -59,6 +59,16 @@ class ScanHistoryProvider extends ChangeNotifier {
     return filtered;
   }
 
+  /// Always newest-first and never affected by the Scan History screen's
+  /// filter/sort UI state — for consumers like Home Dashboard's "Recent
+  /// Activity" that need the actual most-recent scans regardless of
+  /// whatever the user last filtered Scan History to.
+  List<Scan> get recentScans {
+    final sorted = [..._allScans]
+      ..sort((a, b) => b.scannedAt.compareTo(a.scannedAt));
+    return sorted;
+  }
+
   Future<void> loadScans() async {
     _isLoading = true;
     _hasError = false;

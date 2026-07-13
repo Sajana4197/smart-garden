@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +8,8 @@ import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_indicator.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
+import '../../../../core/widgets/error_state_widget.dart';
+import '../../../../core/widgets/safe_file_image.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../home_dashboard/presentation/widgets/scan_source_sheet.dart';
 import '../../../plant_health_dashboard/presentation/providers/plant_health_dashboard_provider.dart';
@@ -51,6 +51,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
   late Plant _plant;
   List<Scan> _scans = [];
   bool _isLoadingScans = true;
+  bool _hasScansError = false;
 
   @override
   void initState() {
@@ -60,14 +61,25 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
   }
 
   Future<void> _loadScans() async {
-    setState(() => _isLoadingScans = true);
-    final getScansForPlant = context.read<GetScansForPlant>();
-    final scans = await getScansForPlant(_plant.id!);
-    if (!mounted) return;
     setState(() {
-      _scans = scans;
-      _isLoadingScans = false;
+      _isLoadingScans = true;
+      _hasScansError = false;
     });
+    final getScansForPlant = context.read<GetScansForPlant>();
+    try {
+      final scans = await getScansForPlant(_plant.id!);
+      if (!mounted) return;
+      setState(() {
+        _scans = scans;
+        _isLoadingScans = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _hasScansError = true;
+        _isLoadingScans = false;
+      });
+    }
   }
 
   Future<void> _edit() async {
@@ -158,7 +170,7 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
             aspectRatio: 4 / 3,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-              child: Image.file(File(_plant.imagePath), fit: BoxFit.cover),
+              child: SafeFileImage(path: _plant.imagePath),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -208,6 +220,13 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
           const SizedBox(height: AppSpacing.sm),
           if (_isLoadingScans)
             const AppLoadingIndicator()
+          else if (_hasScansError)
+            ErrorStateWidget(
+              title: 'Could not load scan history',
+              message: 'Something went wrong loading this plant\'s scans.',
+              retryLabel: 'Try Again',
+              onRetry: _loadScans,
+            )
           else if (_scans.isEmpty)
             Text(
               'No scans linked to this plant yet.',
@@ -247,12 +266,7 @@ class _ScanHistoryTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-            child: Image.file(
-              File(scan.imagePath),
-              width: 48,
-              height: 48,
-              fit: BoxFit.cover,
-            ),
+            child: SafeFileImage(path: scan.imagePath, width: 48, height: 48),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(

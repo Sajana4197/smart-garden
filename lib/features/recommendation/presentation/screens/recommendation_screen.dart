@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +8,7 @@ import '../../../../core/widgets/app_bar.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
+import '../../../../core/widgets/safe_file_image.dart';
 import '../../../../core/widgets/staggered_fade_in.dart';
 import '../../../../services/ai/ai_service.dart';
 import '../../../voice/presentation/widgets/read_aloud_controls.dart';
@@ -85,12 +84,7 @@ class RecommendationScreen extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-                child: Image.file(
-                  File(imagePath),
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
-                ),
+                child: SafeFileImage(path: imagePath, width: 64, height: 64),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(

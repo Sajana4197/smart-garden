@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_status_badge.dart';
+import '../../../../core/widgets/safe_file_image.dart';
 import '../../domain/entities/garden_health_summary.dart';
 
 /// One row in the Plant Health Dashboard's "Needs Attention" list —
@@ -33,12 +32,7 @@ class NeedsAttentionTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
-            child: Image.file(
-              File(plant.imagePath),
-              width: 48,
-              height: 48,
-              fit: BoxFit.cover,
-            ),
+            child: SafeFileImage(path: plant.imagePath, width: 48, height: 48),
           ),
           const SizedBox(width: AppSpacing.sm2),
           Expanded(

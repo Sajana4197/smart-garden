@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/widgets/app_primary_button.dart';
+import '../../../../core/widgets/safe_file_image.dart';
 import '../../../../services/ai/ai_service.dart';
 import '../../../result/presentation/screens/result_screen.dart';
 import '../../../scan_history/domain/entities/scan.dart';
@@ -18,9 +19,13 @@ import '../../../scan_history/presentation/providers/scan_history_provider.dart'
 /// just-captured photo, per UI_GUIDELINES.md §5. Keeps the same Hero tag as
 /// Preview/Result so the photo persists visually across all three screens.
 /// Calls the real `AIService.analyzeImage()` (Phase 7), persists the
-/// resulting scan via `ScanRepository`, then hands off to Result. On
-/// `AIServiceException` it shows an inline error with Retry, per
-/// MODEL_INTEGRATION.md §2 — never a raw exception.
+/// resulting scan via `ScanRepository`, then hands off to Result. Catches
+/// both the typed `AIServiceException` (MODEL_INTEGRATION.md §2) *and*
+/// anything else — notably `ScanRepository.addScan` failing after a
+/// successful analysis — generically, so the sweep animation never spins
+/// forever and the screen never crashes; see CLAUDE.md §3's "Broad
+/// exception handling in degrade-on-failure providers" precedent, the same
+/// class of bug caught in `WeatherProvider` during Phase 11.
 class AiLoadingScreen extends StatefulWidget {
   const AiLoadingScreen({super.key, required this.imagePath});
 
@@ -34,7 +39,7 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
     with TickerProviderStateMixin {
   late final AnimationController _sweepController;
   late final AnimationController _pulseController;
-  AIServiceException? _error;
+  ({String title, String message})? _error;
 
   @override
   void initState() {
@@ -78,7 +83,15 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
       );
     } on AIServiceException catch (e) {
       if (!mounted) return;
-      setState(() => _error = e);
+      setState(() => _error = (title: _errorTitle(e.type), message: e.message));
+    } catch (_) {
+      if (!mounted) return;
+      setState(
+        () => _error = (
+          title: 'Something went wrong',
+          message: "Couldn't save this scan. Please try again.",
+        ),
+      );
     }
   }
 
@@ -117,7 +130,7 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
     );
   }
 
-  Widget _buildError(AIServiceException error) {
+  Widget _buildError(({String title, String message}) error) {
     return ColoredBox(
       color: Colors.black,
       child: Padding(
@@ -129,7 +142,7 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
               const Icon(Icons.error_outline, size: 64, color: Colors.white70),
               const SizedBox(height: AppSpacing.md),
               Text(
-                _errorTitle(error.type),
+                error.title,
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(color: Colors.white),
@@ -158,7 +171,7 @@ class _AiLoadingScreenState extends State<AiLoadingScreen>
       children: [
         Hero(
           tag: widget.imagePath,
-          child: Image.file(File(widget.imagePath), fit: BoxFit.cover),
+          child: SafeFileImage(path: widget.imagePath),
         ),
         // Scrim so the sweep line and label stay legible over any photo —
         // same image-overlay rule as UI_GUIDELINES.md §2.
