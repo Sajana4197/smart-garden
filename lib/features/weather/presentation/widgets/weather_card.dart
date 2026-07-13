@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../settings/domain/entities/temperature_unit.dart';
+import '../../../settings/presentation/providers/settings_provider.dart';
 import '../../domain/entities/current_weather.dart';
 import '../providers/weather_provider.dart';
 
@@ -17,6 +19,16 @@ IconData _iconForCondition(WeatherCondition condition) => switch (condition) {
       WeatherCondition.atmosphere => Icons.foggy,
       WeatherCondition.unknown => Icons.help_outline,
     };
+
+/// Client-side conversion only — `CurrentWeather.temperatureCelsius` always
+/// stores Celsius (CLAUDE.md §3), so this is purely a display concern and
+/// never touches the weather fetch/API layer.
+String _formatTemperature(double celsius, TemperatureUnit unit) {
+  if (unit == TemperatureUnit.fahrenheit) {
+    return '${(celsius * 9 / 5 + 32).round()}°F';
+  }
+  return '${celsius.round()}°C';
+}
 
 String _messageFor(WeatherDegradedReason reason) => switch (reason) {
       WeatherDegradedReason.permissionDenied =>
@@ -55,6 +67,7 @@ class WeatherCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<WeatherProvider>();
+    final temperatureUnit = context.watch<SettingsProvider>().settings.temperatureUnit;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -121,7 +134,7 @@ class WeatherCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${current.temperatureCelsius.round()}°C',
+                _formatTemperature(current.temperatureCelsius, temperatureUnit),
                 style: textTheme.headlineSmall,
               ),
             ],

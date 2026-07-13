@@ -18,4 +18,12 @@ abstract class SpeechRepository {
   Future<void> pause();
 
   Future<void> stop();
+
+  /// Applied immediately to the live engine, and to the next utterance —
+  /// see ROADMAP.md Phase 15 (Settings TTS controls). Value ranges are
+  /// enforced by the UI slider (`SpeechSettings.minRate`/`maxRate`), not
+  /// here.
+  Future<void> setSpeechRate(double rate);
+
+  Future<void> setSpeechPitch(double pitch);
 }

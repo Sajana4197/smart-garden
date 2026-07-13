@@ -29,6 +29,12 @@ class _FakeSpeechRepository implements SpeechRepository {
 
   @override
   Future<void> stop() async => _controller.add(SpeechStatus.idle);
+
+  @override
+  Future<void> setSpeechRate(double rate) async {}
+
+  @override
+  Future<void> setSpeechPitch(double pitch) async {}
 }
 
 void main() {

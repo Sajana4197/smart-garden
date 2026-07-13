@@ -42,6 +42,15 @@ import 'features/my_garden/presentation/providers/my_garden_provider.dart';
 import 'features/recommendation/data/repositories/recommendation_repository_impl.dart';
 import 'features/recommendation/domain/repositories/recommendation_repository.dart';
 import 'features/recommendation/domain/usecases/get_care_recommendation.dart';
+import 'features/settings/data/datasources/settings_local_datasource.dart';
+import 'features/settings/data/repositories/settings_repository_impl.dart';
+import 'features/settings/domain/repositories/settings_repository.dart';
+import 'features/settings/domain/usecases/clear_garden_data.dart';
+import 'features/settings/domain/usecases/set_speech_settings.dart';
+import 'features/settings/domain/usecases/set_temperature_unit.dart';
+import 'features/settings/domain/usecases/set_theme_mode.dart';
+import 'features/settings/presentation/providers/settings_provider.dart';
+import 'features/settings/presentation/utils/theme_mode_mapping.dart';
 import 'features/scan_history/data/datasources/scan_local_datasource.dart';
 import 'features/scan_history/data/repositories/scan_repository_impl.dart';
 import 'features/scan_history/domain/repositories/scan_repository.dart';
@@ -59,6 +68,7 @@ import 'features/weather/domain/usecases/get_current_weather.dart';
 import 'features/weather/presentation/providers/weather_provider.dart';
 import 'services/ai/ai_service.dart';
 import 'services/ai/mock_ai_service.dart';
+import 'services/app_info/app_info_service.dart';
 import 'services/storage/image_storage_service.dart';
 
 class SmartGardenApp extends StatelessWidget {
@@ -94,11 +104,23 @@ class SmartGardenApp extends StatelessWidget {
       TipBankDataSource(),
       DailyTipStateLocalDataSource(),
     );
-    final SpeechRepository speechRepository = SpeechRepositoryImpl();
+    final SettingsRepository settingsRepository = SettingsRepositoryImpl(
+      SettingsLocalDataSource(prefs),
+    );
+    final initialSettings = settingsRepository.getSettings();
+    final SpeechRepository speechRepository = SpeechRepositoryImpl(
+      initialRate: initialSettings.speechSettings.rate,
+      initialPitch: initialSettings.speechSettings.pitch,
+    );
+    final appInfoService = AppInfoService();
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeModeController()),
+        ChangeNotifierProvider(
+          create: (_) => ThemeModeController(
+            initialMode: toFlutterThemeMode(initialSettings.themeMode),
+          ),
+        ),
         Provider<CheckOnboardingStatus>(
           create: (_) => CheckOnboardingStatus(onboardingRepository),
         ),
@@ -187,6 +209,31 @@ class SmartGardenApp extends StatelessWidget {
         ),
         Provider<StopSpeech>(
           create: (_) => StopSpeech(speechRepository),
+        ),
+        Provider<AppInfoService>(create: (_) => appInfoService),
+        Provider<SettingsRepository>(create: (_) => settingsRepository),
+        Provider<SetThemeMode>(
+          create: (_) => SetThemeMode(settingsRepository),
+        ),
+        Provider<SetTemperatureUnit>(
+          create: (_) => SetTemperatureUnit(settingsRepository),
+        ),
+        Provider<SetSpeechSettings>(
+          create: (_) => SetSpeechSettings(settingsRepository),
+        ),
+        Provider<ClearGardenData>(
+          create: (_) => ClearGardenData(plantRepository, scanRepository),
+        ),
+        ChangeNotifierProvider<SettingsProvider>(
+          create: (context) => SettingsProvider(
+            settingsRepository,
+            context.read<SetThemeMode>(),
+            context.read<SetTemperatureUnit>(),
+            context.read<SetSpeechSettings>(),
+            context.read<ClearGardenData>(),
+            speechRepository,
+            context.read<ThemeModeController>(),
+          ),
         ),
       ],
       child: Consumer<ThemeModeController>(
