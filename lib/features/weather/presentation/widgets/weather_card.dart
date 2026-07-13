@@ -6,19 +6,8 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../settings/domain/entities/temperature_unit.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
-import '../../domain/entities/current_weather.dart';
 import '../providers/weather_provider.dart';
-
-IconData _iconForCondition(WeatherCondition condition) => switch (condition) {
-      WeatherCondition.clear => Icons.wb_sunny_outlined,
-      WeatherCondition.clouds => Icons.wb_cloudy_outlined,
-      WeatherCondition.rain => Icons.water_drop_outlined,
-      WeatherCondition.drizzle => Icons.grain,
-      WeatherCondition.thunderstorm => Icons.thunderstorm_outlined,
-      WeatherCondition.snow => Icons.ac_unit,
-      WeatherCondition.atmosphere => Icons.foggy,
-      WeatherCondition.unknown => Icons.help_outline,
-    };
+import 'animated_weather_icon.dart';
 
 /// Client-side conversion only — `CurrentWeather.temperatureCelsius` always
 /// stores Celsius (CLAUDE.md §3), so this is purely a display concern and
@@ -117,7 +106,7 @@ class WeatherCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(_iconForCondition(current.condition), size: 40, color: colorScheme.primary),
+              AnimatedWeatherIcon(condition: current.condition, size: 40, color: colorScheme.primary),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(

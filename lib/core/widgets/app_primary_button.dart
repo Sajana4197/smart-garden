@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'press_scale.dart';
+
 /// Primary call-to-action button (Confirm, Save, Scan Now) — see
 /// UI_GUIDELINES.md §6.
 class AppPrimaryButton extends StatelessWidget {
@@ -16,13 +18,13 @@ class AppPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (icon != null) {
-      return FilledButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon),
-        label: Text(label),
-      );
-    }
-    return FilledButton(onPressed: onPressed, child: Text(label));
+    final button = icon != null
+        ? FilledButton.icon(
+            onPressed: onPressed,
+            icon: Icon(icon),
+            label: Text(label),
+          )
+        : FilledButton(onPressed: onPressed, child: Text(label));
+    return PressScale(enabled: onPressed != null, child: button);
   }
 }

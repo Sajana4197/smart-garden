@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_loading_indicator.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/error_state_widget.dart';
 import '../../../../core/widgets/section_header.dart';
+import '../../../../core/widgets/staggered_fade_in.dart';
 import '../providers/plant_health_dashboard_provider.dart';
 import '../widgets/health_distribution_bar.dart';
 import '../widgets/health_stat_card.dart';
@@ -89,14 +90,17 @@ class PlantHealthDashboardScreen extends StatelessWidget {
                 ),
               )
             else
-              for (final entry in summary.needsAttention)
+              for (final (index, entry) in summary.needsAttention.indexed)
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm2),
-                  child: NeedsAttentionTile(
-                    entry: entry,
-                    onTap: () => context.push(
-                      AppRoutes.plantDetail,
-                      extra: entry.plant,
+                  child: StaggeredFadeIn(
+                    index: index,
+                    child: NeedsAttentionTile(
+                      entry: entry,
+                      onTap: () => context.push(
+                        AppRoutes.plantDetail,
+                        extra: entry.plant,
+                      ),
                     ),
                   ),
                 ),

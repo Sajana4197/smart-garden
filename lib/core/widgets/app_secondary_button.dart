@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'press_scale.dart';
+
 /// Secondary action button (e.g. Retake, Edit) — outlined per
 /// UI_GUIDELINES.md §6.
 class AppSecondaryButton extends StatelessWidget {
@@ -16,13 +18,13 @@ class AppSecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (icon != null) {
-      return OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon),
-        label: Text(label),
-      );
-    }
-    return OutlinedButton(onPressed: onPressed, child: Text(label));
+    final button = icon != null
+        ? OutlinedButton.icon(
+            onPressed: onPressed,
+            icon: Icon(icon),
+            label: Text(label),
+          )
+        : OutlinedButton(onPressed: onPressed, child: Text(label));
+    return PressScale(enabled: onPressed != null, child: button);
   }
 }

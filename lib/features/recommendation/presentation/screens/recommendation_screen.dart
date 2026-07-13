@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_bar.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/app_status_badge.dart';
+import '../../../../core/widgets/staggered_fade_in.dart';
 import '../../../../services/ai/ai_service.dart';
 import '../../../voice/presentation/widgets/read_aloud_controls.dart';
 import '../../domain/entities/care_recommendation.dart';
@@ -134,22 +135,25 @@ class RecommendationScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final step in recommendation.treatmentSteps)
+                for (final (index, step) in recommendation.treatmentSteps.indexed)
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.check_circle_outline,
-                          size: 20,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: Text(step, style: textTheme.bodyMedium),
-                        ),
-                      ],
+                    child: StaggeredFadeIn(
+                      index: index,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            size: 20,
+                            color: colorScheme.primary,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(step, style: textTheme.bodyMedium),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
               ],

@@ -7,10 +7,11 @@ import 'package:provider/provider.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/widgets/app_bar.dart';
-import '../../../../core/widgets/app_loading_indicator.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/error_state_widget.dart';
+import '../../../../core/widgets/skeleton_box.dart';
+import '../../../../core/widgets/staggered_fade_in.dart';
 import '../../domain/entities/plant.dart';
 import '../providers/my_garden_provider.dart';
 
@@ -31,7 +32,7 @@ class MyGardenScreen extends StatelessWidget {
 
     late final Widget body;
     if (provider.isLoading && provider.plants.isEmpty) {
-      body = const AppLoadingIndicator();
+      body = const _PlantGridSkeleton();
     } else if (provider.hasError) {
       body = ErrorStateWidget(
         title: 'Could not load your garden',
@@ -59,9 +60,12 @@ class MyGardenScreen extends StatelessWidget {
           itemCount: provider.plants.length,
           itemBuilder: (context, index) {
             final plant = provider.plants[index];
-            return _PlantGridTile(
-              plant: plant,
-              onTap: () => context.push(AppRoutes.plantDetail, extra: plant),
+            return StaggeredFadeIn(
+              index: index,
+              child: _PlantGridTile(
+                plant: plant,
+                onTap: () => context.push(AppRoutes.plantDetail, extra: plant),
+              ),
             );
           },
         ),
@@ -71,6 +75,34 @@ class MyGardenScreen extends StatelessWidget {
     return Scaffold(
       appBar: const SmartGardenAppBar(title: 'My Garden'),
       body: body,
+    );
+  }
+}
+
+class _PlantGridSkeleton extends StatelessWidget {
+  const _PlantGridSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: AppSpacing.md,
+        crossAxisSpacing: AppSpacing.md,
+        childAspectRatio: 0.78,
+      ),
+      itemCount: 6,
+      itemBuilder: (context, index) => const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: SkeletonBox(width: double.infinity, height: double.infinity)),
+          SizedBox(height: AppSpacing.xs),
+          SkeletonBox(width: 96, height: 14),
+          SizedBox(height: AppSpacing.xs),
+          SkeletonBox(width: 64, height: 12),
+        ],
+      ),
     );
   }
 }

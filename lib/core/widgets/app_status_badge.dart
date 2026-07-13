@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_spacing.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 
 /// Plant-health severity levels a status badge can represent. Feature
 /// domain layers map their own status types onto this when rendering.
@@ -48,7 +49,9 @@ class AppStatusBadge extends StatelessWidget {
         ),
     };
 
-    return Container(
+    return AnimatedContainer(
+      duration: AppDurations.fast,
+      curve: AppCurves.standard,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm2,
         vertical: AppSpacing.xs,

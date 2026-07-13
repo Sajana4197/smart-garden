@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_bar.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_loading_indicator.dart';
 import '../../../../core/widgets/error_state_widget.dart';
+import '../../../../core/widgets/staggered_fade_in.dart';
 import '../../domain/entities/plant_tip.dart';
 import '../../domain/usecases/get_all_tips.dart';
 
@@ -57,19 +58,22 @@ class _AllTipsScreenState extends State<AllTipsScreen> {
             separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
             itemBuilder: (context, index) {
               final tip = tips[index];
-              return AppCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(tip.title, style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      tip.body,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                  ],
+              return StaggeredFadeIn(
+                index: index,
+                child: AppCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(tip.title, style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        tip.body,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

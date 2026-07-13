@@ -8,10 +8,11 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/widgets/app_bar.dart';
 import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/app_loading_indicator.dart';
 import '../../../../core/widgets/app_status_badge.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/error_state_widget.dart';
+import '../../../../core/widgets/skeleton_box.dart';
+import '../../../../core/widgets/staggered_fade_in.dart';
 import '../../domain/entities/scan.dart';
 import '../providers/scan_history_provider.dart';
 import '../widgets/scan_filter_bar.dart';
@@ -44,7 +45,7 @@ class ScanHistoryScreen extends StatelessWidget {
 
     late final Widget body;
     if (provider.isLoading && !provider.hasAnyScans) {
-      body = const AppLoadingIndicator();
+      body = const _ScanListSkeleton();
     } else if (provider.hasError) {
       body = ErrorStateWidget(
         title: 'Could not load scan history',
@@ -83,11 +84,14 @@ class ScanHistoryScreen extends StatelessWidget {
                           const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final scan = scans[index];
-                        return _ScanListTile(
-                          scan: scan,
-                          onTap: () => context.push(
-                            AppRoutes.scanDetail,
-                            extra: scan,
+                        return StaggeredFadeIn(
+                          index: index,
+                          child: _ScanListTile(
+                            scan: scan,
+                            onTap: () => context.push(
+                              AppRoutes.scanDetail,
+                              extra: scan,
+                            ),
                           ),
                         );
                       },
@@ -162,6 +166,37 @@ class _ScanListTile extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           AppStatusBadge(status: _scanStatus(scan.severity)),
         ],
+      ),
+    );
+  }
+}
+
+class _ScanListSkeleton extends StatelessWidget {
+  const _ScanListSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      itemCount: 6,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+      itemBuilder: (context, index) => AppCard(
+        child: Row(
+          children: [
+            const SkeletonBox(width: 56, height: 56, borderRadius: AppSpacing.radiusSmall),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  SkeletonBox(width: 140, height: 16),
+                  SizedBox(height: AppSpacing.xs),
+                  SkeletonBox(width: 90, height: 12),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
