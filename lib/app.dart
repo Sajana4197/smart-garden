@@ -68,8 +68,17 @@ import 'features/weather/domain/usecases/get_current_weather.dart';
 import 'features/weather/presentation/providers/weather_provider.dart';
 import 'services/ai/ai_service.dart';
 import 'services/ai/mock_ai_service.dart';
+import 'services/ai/tflite_ai_service.dart';
 import 'services/app_info/app_info_service.dart';
 import 'services/storage/image_storage_service.dart';
+
+/// DI swap mechanism — see MODEL_INTEGRATION.md §6 and CLAUDE.md's Phase 18
+/// Locked Decision. Defaults to the mock so plain `flutter run`/`flutter
+/// test` never depends on the (large, device-specific) real model; pass
+/// `--dart-define=USE_REAL_AI_MODEL=true` to use [TFLiteAIService] instead.
+/// `MockAIService` stays in the codebase permanently for widget/integration
+/// tests either way.
+const _kUseRealAIModel = bool.fromEnvironment('USE_REAL_AI_MODEL');
 
 class SmartGardenApp extends StatelessWidget {
   const SmartGardenApp({super.key, required this.prefs});
@@ -86,7 +95,8 @@ class SmartGardenApp extends StatelessWidget {
         CameraCaptureRepositoryImpl(imageStorageService);
     final GalleryRepository galleryRepository =
         GalleryRepositoryImpl(imageStorageService);
-    final AIService aiService = MockAIService();
+    final AIService aiService =
+        _kUseRealAIModel ? TFLiteAIService() : MockAIService();
     final ScanRepository scanRepository = ScanRepositoryImpl(
       ScanLocalDataSource(),
     );

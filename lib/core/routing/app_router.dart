@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:go_router/go_router.dart';
 
 import '../debug/component_gallery_screen.dart';
@@ -53,11 +54,16 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) =>
           buildAppPage(state: state, child: const OnboardingScreen()),
     ),
-    GoRoute(
-      path: AppRoutes.debugGallery,
-      pageBuilder: (context, state) =>
-          buildAppPage(state: state, child: const ComponentGalleryScreen()),
-    ),
+    // Debug-only route — see the home dashboard's app bar action for the
+    // matching entry point guard. kDebugMode is a compile-time constant,
+    // so this route (and ComponentGalleryScreen with it) is tree-shaken
+    // out of release builds entirely.
+    if (kDebugMode)
+      GoRoute(
+        path: AppRoutes.debugGallery,
+        pageBuilder: (context, state) =>
+            buildAppPage(state: state, child: const ComponentGalleryScreen()),
+      ),
     GoRoute(
       path: AppRoutes.camera,
       pageBuilder: (context, state) =>

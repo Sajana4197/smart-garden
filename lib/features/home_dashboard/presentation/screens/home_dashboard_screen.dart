@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -34,14 +35,19 @@ class HomeDashboardScreen extends StatelessWidget {
     return Scaffold(
       appBar: SmartGardenAppBar(
         title: 'SmartGarden AI',
-        actions: [
-          // TODO(Phase 19): remove/guard this debug entry point.
-          IconButton(
-            tooltip: 'Component gallery (debug)',
-            icon: const Icon(Icons.palette_outlined),
-            onPressed: () => context.push(AppRoutes.debugGallery),
-          ),
-        ],
+        // Debug-only entry point (Phase 19 exit criteria: no debug
+        // artifacts in a release build) — kDebugMode is a compile-time
+        // constant, so this whole branch (and the route it links to) is
+        // tree-shaken out of release builds entirely, not just hidden.
+        actions: kDebugMode
+            ? [
+                IconButton(
+                  tooltip: 'Component gallery (debug)',
+                  icon: const Icon(Icons.palette_outlined),
+                  onPressed: () => context.push(AppRoutes.debugGallery),
+                ),
+              ]
+            : null,
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),

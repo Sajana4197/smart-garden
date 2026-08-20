@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="smart_garden_ai"
+        android:label="SmartGarden AI"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
