@@ -1,60 +1,59 @@
-// One-off generator (Phase 19) — draws the app icon + splash logo as raw
-// pixel buffers via package:image, deliberately avoiding Flutter's widget/
-// rendering pipeline (which hung indefinitely for image capture in this
-// dev environment). Run: dart run tool/generate_icons.dart
+// Generates the app icon + splash logo PNGs from the app's own seed-derived
+// M3 colors (see core/theme/app_theme.dart's seedColor). Deliberately pure
+// pixel-buffer drawing via package:image — NOT Flutter's widget/rendering
+// pipeline (RenderRepaintBoundary.toImage() proved unreliable to complete
+// in this sandboxed dev environment, and rendering Icons.eco via a widget
+// test silently fell back to a placeholder shape rather than the real
+// glyph, since flutter test doesn't reliably load real fonts). This script
+// runs as plain Dart (`dart run tool/generate_icons.dart`), no Flutter
+// engine/test harness involved at all.
 //
-// The leaf mark is a simple tilted "rugby-ball" ellipse (reads clearly as
-// a stylized leaf at icon scale, same spirit as Icons.eco used elsewhere
-// in the app) plus a midrib line, in the app's exact seed-derived M3
-// colors (see CLAUDE.md Phase 19 Locked Decision) so it's visually
-// consistent with the in-app SplashScreen (CircleAvatar + eco icon).
+// The mark: a simple tilted "leaf blade" (a stretched, rotated ellipse) in
+// the app's own colors — bold and legible at small icon sizes. No
+// midrib/stem line: an earlier draft with one showed visible aliasing at
+// small sizes, so the final mark is a solid silhouette only.
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:image/image.dart' as img_lib;
 
-const seedColor = 0xFF2E7D32; // ARGB
-const primaryContainer = 0xFFBCF0B4;
-const onPrimaryContainer = 0xFF245024;
-const white = 0xFFFFFFFF;
-const transparent = 0x00000000;
+// Exact hex values computed from ColorScheme.fromSeed(seedColor: 0xFF2E7D32).
+const seedColor = 0xFF2E7D32; // icon background / adaptive-icon background
+const surfaceColor = 0xFFF7FBF1; // splash background
+const primaryContainer = 0xFFBCF0B4; // splash logo circle
+const onPrimaryContainer = 0xFF245024; // splash logo leaf
 
-img_lib.Color colorFromArgb(int argb) => img_lib.ColorRgba8(
-      (argb >> 16) & 0xFF,
-      (argb >> 8) & 0xFF,
-      argb & 0xFF,
-      (argb >> 24) & 0xFF,
-    );
+img_lib.ColorRgba8 rgba(int argb, {int? alpha}) {
+  return img_lib.ColorRgba8(
+    (argb >> 16) & 0xFF,
+    (argb >> 8) & 0xFF,
+    argb & 0xFF,
+    alpha ?? (argb >> 24) & 0xFF,
+  );
+}
 
-/// Fills a tilted "rugby-ball" leaf shape (a stretched ellipse — tapers to
-/// a soft point at both ends of its long axis, unlike a plain oval) into
-/// [image], centered at ([cx],[cy]), long semi-axis [a], short semi-axis
-/// [b], rotated [angleDeg] degrees, in [color].
-void fillLeaf(
+/// Draws a filled, rotated ellipse ("leaf blade") centered at [cx],[cy].
+void drawLeaf(
   img_lib.Image image, {
   required double cx,
   required double cy,
-  required double a,
-  required double b,
-  required double angleDeg,
-  required img_lib.Color color,
+  required double semiMajor,
+  required double semiMinor,
+  required double angleDegrees,
+  required img_lib.ColorRgba8 color,
 }) {
-  final theta = angleDeg * math.pi / 180;
-  final cosT = math.cos(theta);
-  final sinT = math.sin(theta);
-  final margin = math.max(a, b) + 2;
+  final angle = angleDegrees * math.pi / 180;
+  final cosA = math.cos(-angle);
+  final sinA = math.sin(-angle);
 
-  final minX = (cx - margin).floor().clamp(0, image.width - 1);
-  final maxX = (cx + margin).ceil().clamp(0, image.width - 1);
-  final minY = (cy - margin).floor().clamp(0, image.height - 1);
-  final maxY = (cy + margin).ceil().clamp(0, image.height - 1);
-
-  for (var y = minY; y <= maxY; y++) {
-    for (var x = minX; x <= maxX; x++) {
+  for (var y = 0; y < image.height; y++) {
+    for (var x = 0; x < image.width; x++) {
       final dx = x - cx;
       final dy = y - cy;
-      final rx = dx * cosT + dy * sinT;
-      final ry = -dx * sinT + dy * cosT;
-      final v = (rx * rx) / (a * a) + (ry * ry) / (b * b);
+      final rx = dx * cosA - dy * sinA;
+      final ry = dx * sinA + dy * cosA;
+      final v = (rx * rx) / (semiMajor * semiMajor) +
+          (ry * ry) / (semiMinor * semiMinor);
       if (v <= 1.0) {
         image.setPixel(x, y, color);
       }
@@ -62,63 +61,79 @@ void fillLeaf(
   }
 }
 
+void fillTransparent(img_lib.Image image) {
+  for (var y = 0; y < image.height; y++) {
+    for (var x = 0; x < image.width; x++) {
+      image.setPixel(x, y, img_lib.ColorRgba8(0, 0, 0, 0));
+    }
+  }
+}
+
 void main() {
-  // 1) Flat combined icon (1024x1024): solid seed-green fill + white leaf.
-  //    Used as the general/iOS image_path — platform tooling applies its
-  //    own corner-rounding mask, so no rounding needed here.
-  final flat = img_lib.Image(width: 1024, height: 1024, numChannels: 4);
-  img_lib.fill(flat, color: colorFromArgb(seedColor));
-  fillLeaf(
+  const size = 1024;
+
+  // 1) Flat combined icon: seed-green background + white leaf. Used as the
+  //    general/iOS icon (image_path).
+  final flat = img_lib.Image(width: size, height: size, numChannels: 4);
+  img_lib.fill(flat, color: rgba(seedColor, alpha: 255));
+  drawLeaf(
     flat,
-    cx: 512,
-    cy: 512,
-    a: 380,
-    b: 130,
-    angleDeg: 45,
-    color: colorFromArgb(white),
+    cx: size / 2,
+    cy: size / 2,
+    semiMajor: size * 0.32,
+    semiMinor: size * 0.15,
+    angleDegrees: 45,
+    color: img_lib.ColorRgba8(255, 255, 255, 255),
   );
-  img_lib.encodePngFile('assets/icon/icon_flat.png', flat);
+  File('assets/icon/icon_flat.png').writeAsBytesSync(img_lib.encodePng(flat));
 
-  // 2) Adaptive-icon foreground (1024x1024, transparent bg, leaf sized to
-  //    the ~66% safe zone so Android's adaptive mask never clips it).
-  final fg = img_lib.Image(width: 1024, height: 1024, numChannels: 4);
-  img_lib.fill(fg, color: colorFromArgb(transparent));
-  fillLeaf(
+  // 2) Adaptive-icon foreground: transparent background, leaf sized to the
+  //    ~66% safe zone so Android's adaptive mask never clips it.
+  final fg = img_lib.Image(width: size, height: size, numChannels: 4);
+  fillTransparent(fg);
+  drawLeaf(
     fg,
-    cx: 512,
-    cy: 512,
-    a: 280,
-    b: 96,
-    angleDeg: 45,
-    color: colorFromArgb(white),
+    cx: size / 2,
+    cy: size / 2,
+    semiMajor: size * 0.24,
+    semiMinor: size * 0.11,
+    angleDegrees: 45,
+    color: img_lib.ColorRgba8(255, 255, 255, 255),
   );
-  img_lib.encodePngFile('assets/icon/icon_foreground.png', fg);
+  File('assets/icon/icon_foreground.png')
+      .writeAsBytesSync(img_lib.encodePng(fg));
 
-  // 3) Splash logo (transparent bg): primaryContainer circle +
-  //    onPrimaryContainer leaf, matching the in-app SplashScreen's
+  // 3) Splash logo: primaryContainer circle + onPrimaryContainer leaf,
+  //    transparent background — matches the in-app SplashScreen's
   //    CircleAvatar(backgroundColor: primaryContainer, Icon(eco,
-  //    color: onPrimaryContainer)) as closely as a static mark can.
-  final splash = img_lib.Image(width: 480, height: 480, numChannels: 4);
-  img_lib.fill(splash, color: colorFromArgb(transparent));
+  //    color: onPrimaryContainer)) exactly, so native splash -> Dart
+  //    SplashScreen is a seamless handoff.
+  const splashSize = 480;
+  final splash =
+      img_lib.Image(width: splashSize, height: splashSize, numChannels: 4);
+  fillTransparent(splash);
   img_lib.fillCircle(
     splash,
-    x: 240,
-    y: 240,
-    radius: 200,
-    color: colorFromArgb(primaryContainer),
+    x: splashSize ~/ 2,
+    y: splashSize ~/ 2,
+    radius: (splashSize * 0.42).round(),
+    color: rgba(primaryContainer, alpha: 255),
   );
-  fillLeaf(
+  drawLeaf(
     splash,
-    cx: 240,
-    cy: 240,
-    a: 120,
-    b: 42,
-    angleDeg: 45,
-    color: colorFromArgb(onPrimaryContainer),
+    cx: splashSize / 2,
+    cy: splashSize / 2,
+    semiMajor: splashSize * 0.20,
+    semiMinor: splashSize * 0.095,
+    angleDegrees: 45,
+    color: rgba(onPrimaryContainer, alpha: 255),
   );
-  img_lib.encodePngFile('assets/icon/splash_logo.png', splash);
+  File('assets/icon/splash_logo.png')
+      .writeAsBytesSync(img_lib.encodePng(splash));
 
-  // ignore: avoid_print
-  print('Generated assets/icon/icon_flat.png, icon_foreground.png, '
-      'splash_logo.png');
+  stdout.writeln('Generated assets/icon/icon_flat.png');
+  stdout.writeln('Generated assets/icon/icon_foreground.png');
+  stdout.writeln('Generated assets/icon/splash_logo.png');
+  stdout.writeln('surfaceColor for flutter_native_splash config: '
+      '#${(surfaceColor & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}');
 }

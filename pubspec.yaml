@@ -99,6 +99,11 @@ flutter:
   # one without the other.
     - assets/models/plant_disease_model.tflite
     - assets/models/labels.txt
+  # Leaf detector (YOLOv8n, single generic "leaf" localization concept —
+  # see CLAUDE.md's post-Phase-19 model-v2 Locked Decision) — crops the
+  # photo to the leaf region before it reaches the classifier above, to
+  # close the real-world background-domain-gap found via live testing.
+    - assets/models/leaf_detector.tflite
 
   # Bundled locally (not fetched via google_fonts at runtime) so the app's
   # theme never depends on network access — see CLAUDE.md Locked Decisions.
